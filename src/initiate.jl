@@ -8,8 +8,8 @@ function initiate_rand!(pop::binding_sites, c)
     rest = pop.N - N_sub * c
     for i in 1:c
         push!(pop.seqs, rand(collect(1:pop.n), pop.L))
-        push!(pop.frequs, N_sub)
+        push!(pop.freqs, N_sub)
     end
-    pop.frequs[1] += rest
+    pop.freqs[1] += rest
 end
     

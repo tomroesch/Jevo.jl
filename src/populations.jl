@@ -13,7 +13,7 @@ mutable struct binding_sites <: populations
     # Sequences
     seqs::Array{Array{Int64, 1}, 1}
     # Subpopulation sizes
-    frequs::Array{Int64}
+    freqs::Array{Int64}
 end
 
 binding_sites(;N=N, L=L, l=l, n=n) = binding_sites(N, L, l, n, Array{Int64, 1}[], Int64[])
