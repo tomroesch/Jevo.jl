@@ -16,8 +16,6 @@ mutable struct binding_sites <: populations
     freqs::Array{Int64}
 end
 
-binding_sites(;N=N, L=L, l=l, n=n) = binding_sites(N, L, l, n, Array{Int64, 1}[], Int64[])
-binding_sites(;N=N, L=L, l=l) = binding_sites(N, L, l, 4, Array{Int64, 1}[], Int64[])
-binding_sites(;N=N, l=l, n=n) = binding_sites(N, l, l, n, Array{Int64, 1}[], Int64[])
-binding_sites(;N=N, l=l) = binding_sites(N, l, l, 4, Array{Int64, 1}[], Int64[])
+binding_sites(;N=10000, L=10, l=10, n=4, seqs=Array{Int64, 1}[], freqs=Int64[]) = binding_sites(N, L, l, n, seqs, freqs)
+
     

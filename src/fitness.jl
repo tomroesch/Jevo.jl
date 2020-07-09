@@ -25,9 +25,9 @@ mutable struct fermi_fitness <: fitness_functions
 end
 
 # Setting some defaults
-fermi_fitness(;l=l, beta=beta, f0=f0) = fermi_fitness(l, beta, f0, 0, Est)
-fermi_fitness(;beta=beta, f0=f0) = fermi_fitness(10, beta, f0, 0, Est)
-fermi_fitness(;l=l, beta=beta, f0=f0, fl=fl) = fermi_fitness(l, beta, f0, fl, Est)
+fermi_fitness(;l=10, beta=1, f0=1, fl=0, E_Star=Est) = fermi_fitness(l, beta, f0, fl, E_star)
+
+
 
 
 """
@@ -70,7 +70,7 @@ mutable struct quadratic_fitness <: fitness_functions
 end
 
 # Setting some defaults
-quadratic_fitness(;l=l, c=c) = quadratic_fitness(l, c, Est)
+quadratic_fitness(;l=10, c=1, E_Star=Est) = quadratic_fitness(l, c, E_Star)
 
 
 """
