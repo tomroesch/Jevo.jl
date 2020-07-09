@@ -40,10 +40,6 @@ function _fitness(E::Float64, p::fermi_fitness)
     return fitness
 end
 
-# Add some beautiful broadcasting
-fitness(E, p) = _fitness(E, p)
-Broadcast.broadcasted(::typeof(fitness), E, p) = broadcast(_fitness, E, Ref(p))
-
 
 """
     function fitness(E::Float64, l::Int64, p::fermi_fitness)
@@ -56,10 +52,6 @@ function _fitness(E::Float64, l::Int64, p::fermi_fitness)
 end
 
 
-# Add some beautiful broadcasting
-fitness(E, l, p) = _fitness(E, l, p)
-Broadcast.broadcasted(::typeof(fitness), E, l, p) = broadcast(_fitness, E, l, Ref(p))
-
 """
     Est(l)
 
@@ -70,3 +62,45 @@ function Est(l)
 end
 
 
+
+mutable struct quadratic_fitness <: fitness_functions
+    l::Int64
+    c::Float64
+    E_Star::Function
+end
+
+# Setting some defaults
+quadratic_fitness(;l=l, c=c) = quadratic_fitness(l, c, Est)
+
+
+"""
+    function fitness(E::Float64, p::quadratic_fitness)
+
+Evaluate quadratic fitness function.
+"""
+function _fitness(E::Float64, p::quadratic_fitness)
+    fitness = -p.c * (E - p.E_Star(p.l))^2
+    return fitness
+end
+
+
+
+
+"""
+    function fitness(E::Float64, l::Int64, p::quadratic_fitness)
+
+Evaluate fermi fitness function.
+"""
+function _fitness(E::Float64, l::Int64, p::quadratic_fitness)
+    fitness = -p.c * (E - p.E_Star(l))^2
+    return fitness
+end
+
+
+# Add some beautiful broadcasting
+fitness(E, l, p) = _fitness(E, l, p)
+Broadcast.broadcasted(::typeof(fitness), E, l, p) = broadcast(_fitness, E, l, Ref(p))
+
+
+fitness(E, p) = _fitness(E, p)
+Broadcast.broadcasted(::typeof(fitness), E, p) = broadcast(_fitness, E, Ref(p))

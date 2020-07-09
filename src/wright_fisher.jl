@@ -26,7 +26,7 @@ end
 
 Sample a new generation and remove extinct species.
 """
-function sample!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}) where {T<:Real}
+function sample_gen!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}) where {T<:Real}
     E = get_energy(pop, emat)
     f::Array{Float64, 1} = fitness.(E, fit)
     mean_fitness::Float64 = sum(1 / pop.N * pop.freqs.* f)
