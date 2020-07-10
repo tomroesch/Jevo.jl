@@ -22,7 +22,7 @@ end
 
 
 """
-    function sample!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}) where {T<:Real}
+    function sample_gen!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}) where {T<:Real}
 
 Sample a new generation and remove extinct species.
 """
