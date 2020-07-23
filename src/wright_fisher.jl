@@ -22,16 +22,18 @@ end
 
 
 """
-    function sample_gen!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}) where {T<:Real}
+    function sample_gen!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}; remove=true) where {T<:Real}
 
 Sample a new generation and remove extinct species.
 """
-function sample_gen!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}) where {T<:Real}
+function sample_gen!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}; remove=true) where {T<:Real}
     E = get_energy(pop, emat)
     f::Array{Float64, 1} = fitness.(E, fit)
     mean_fitness::Float64 = sum(1 / pop.N * pop.freqs.* f)
     norm::Float64 = sum(pop.freqs .* exp.(f .- mean_fitness))
     probabilities::Array{Float64, 1} = pop.freqs .* exp.(f .- mean_fitness) ./ norm
     pop.freqs = rand(Multinomial(pop.N, probabilities), 1)[:]
-    remove_empty!(pop.freqs, pop.seqs)
+    if remove
+        remove_empty!(pop.freqs, pop.seqs)
+    end
 end

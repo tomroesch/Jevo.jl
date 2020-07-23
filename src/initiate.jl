@@ -4,9 +4,9 @@
 Iniate a population of c species of random sequences.
 """
 function initiate_rand!(pop::binding_sites, c::Int64; overwrite=false)
-    
+
     if ~isempty(pop.seqs)
-        # Reiniate existing sequences 
+        # Reiniate existing sequences
         if overwrite
             c = size(pops.seqs)
             pop.freqs .= 0
@@ -30,7 +30,7 @@ function initiate_rand!(pop::binding_sites, c::Int64; overwrite=false)
         pop.freqs[1] += rest
     end
 end
-    
+
 
 
 """
@@ -41,9 +41,9 @@ If the given sequence is shorter than the required length, the remaining positio
 if the given sequence is longer than the required length, only the first `L` bases will be taken.
 """
 function initiate_rand!(pop::driver_trailer, c::Int64; driver::Array{Int64, 1}=Int64[], overwrite=false)
-    
+
     if ~isempty(pop.seqs)
-        # Reiniate existing sequences 
+        # Reiniate existing sequences
         if overwrite
             c = size(pops.seqs)
             pop.freqs .= 0
@@ -68,6 +68,11 @@ function initiate_rand!(pop::driver_trailer, c::Int64; driver::Array{Int64, 1}=I
         if isempty(driver)
             pop.driver[:] = rand(collect(1:pop.m), pop.L)
         else
+            if any(driver .> pop.m)
+                throw(ArgumentError("Driver sequence has elements outside of alphabet."))
+            elseif any(driver .< 0)
+                throw(ArgumentError("Don't include negative elements in driver sequence."))
+            end
             if length(driver) == pop.L
                 pop.driver[:] = driver
             elseif length(driver) < pop.L
