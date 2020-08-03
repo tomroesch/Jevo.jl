@@ -1,4 +1,4 @@
-using Jedi, Test, BenchmarkTools
+using Jedi, Test, BenchmarkTools, LinearAlgebra
 
 @testset "Initiating " begin
     @testset "Simple binding sites" begin
@@ -42,6 +42,38 @@ using Jedi, Test, BenchmarkTools
         # Test error message for wrong driver sequence
         @test_throws ArgumentError Jedi.initiate_rand!(pop4, 3, driver=collect(1:12))
     end
+
+    @testset "Driver Trailer sites variable length" begin
+        pop1 = Jedi.driver_trailer_l(N=4, l_0=10, n=4, m=4, L=20)
+        Jedi.initiate_rand!(pop1, 3)
+        # Test population size
+        @test sum(pop1.freqs) == pop1.N
+        # Test number of species
+        @test length(pop1.seqs) == 3
+        # Test sequence length of species
+        @test length.(pop1.seqs) == (ones(Int64, 3) .* pop1.L)
+        # Test length of driver
+        @test length(pop1.driver) == pop1.L
+        # test binding site lengths
+        @test length(pop1.l) == 3
+        @test pop1.l == ones(Int64, 3) * pop1.l_0
+
+        pop2 = Jedi.driver_trailer_l(N=4, l_0=10, n=4, m=4)
+        Jedi.initiate_rand!(pop2, 3, driver=[1, 2, 3, 4])
+        # Test that partial driver sequence is incorporated
+        @test pop2.driver[1:4] == [1, 2, 3, 4]
+
+        pop3 = Jedi.driver_trailer_l(N=4, L=10, n=4, m=12)
+        Jedi.initiate_rand!(pop3, 3, driver=collect(1:12))
+        # Test that driver too long is cut short
+        @test pop3.driver == collect(1:10)
+        # Test warning message
+        @test_logs (:warn, "l_0>L. Choosing L=l_0.") Jedi.driver_trailer_l(N=4, l_0=10, L=2, n=4)
+
+        pop4 = Jedi.driver_trailer_l(N=4, L=10, n=4, m=4)
+        # Test error message for wrong driver sequence
+        @test_throws ArgumentError Jedi.initiate_rand!(pop4, 3, driver=collect(1:12))
+    end
 end
 
 
@@ -77,4 +109,21 @@ end
         @test tmp_driver != pop2.driver
         @test sum(tmp_driver .!= pop2.driver) == 1
     end
+end
+
+@testset "Substitutions" begin
+    pop = Jedi.driver_trailer(N=4, l=10, n=4, m=4)
+    Jedi.initiate_rand!(pop, 2)
+    emat = Matrix{Float64}(I, 4, 4)
+    f = Jedi.fermi_fitness(l=10, beta=1, f0=1, fl=0)
+    # Test error for too many species
+    @test_throws ArgumentError Jedi.bp_substitution!(pop, emat, f)
+
+    pop = Jedi.driver_trailer(N=4, l=10, n=4, m=4)
+    Jedi.initiate_rand!(pop, 1)
+    temp_seqs = copy(pop.seqs)
+    Jedi.bp_substitution!(pop, emat, f)
+    @test length(pop.seqs[1]) == 1
+    @test sum(temp_seqs[1] .!= pop.seqs[1]) == 1
+
 end
