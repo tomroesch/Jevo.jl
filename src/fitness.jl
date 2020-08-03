@@ -1,4 +1,4 @@
-export fermi_fitness, fitness
+export fermi_fitness, fitness, quadratic_fitness
 
 abstract type fitness_functions end
 
@@ -25,7 +25,7 @@ mutable struct fermi_fitness <: fitness_functions
 end
 
 # Setting some defaults
-fermi_fitness(;l=10, beta=1, f0=1, fl=0, E_Star=Est) = fermi_fitness(l, beta, f0, fl, E_star)
+fermi_fitness(;l=10, beta=1, f0=1, fl=0, E_Star=Est) = fermi_fitness(l, beta, f0, fl, E_Star)
 
 
 
