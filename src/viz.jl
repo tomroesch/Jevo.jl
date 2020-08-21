@@ -1,5 +1,7 @@
 using Plots
-plotlyjs()
+
+export default_plotlyjs!
+
 """
     default_plotlyjs!()
 

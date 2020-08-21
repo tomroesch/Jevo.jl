@@ -48,7 +48,7 @@ function mutation!(pop::driver_trailer_l)
     # Choose random sequence depending on subpopulation size
     mutation_sequence = sample(collect(1:length(pop.seqs)), Weights(pop.freqs ./ pop.N))
     # Add sequence to mutate
-    push!(pop.seqs, copy(pop.seqs[mutation_sequence]))
+    push!(pop.seqs, deepcopy(pop.seqs[mutation_sequence]))
     push!(pop.freqs, 1)
     push!(pop.l, pop.l[mutation_sequence])
     pop.freqs[mutation_sequence] -= 1
@@ -64,9 +64,10 @@ function mutation!(pop::driver_trailer_l)
         pop.freqs[copied] += 1
         deleteat!(pop.freqs, length(pop.seqs))
         deleteat!(pop.seqs, length(pop.seqs))
+        deleteat!(pop.l, length(pop.l))
     end
     # Remove extinct species
-    remove_empty!(pop.freqs, pop.seqs, pop.l    )
+    remove_empty!(pop.freqs, pop.seqs, pop.l)
 end
 
 """
@@ -93,15 +94,21 @@ function length_mutation!(pop::driver_trailer_l)
     # Choose random sequence depending on subpopulation size
     mutation_sequence = sample(collect(1:length(pop.seqs)), Weights(pop.freqs ./ pop.N))
     # Add sequence to mutate
+
+    if rand() < 0.5 && pop.l[mutation_sequence] < pop.L
+        var = 1
+    elseif pop.l[mutation_sequence] > 2
+        var = -1
+    else
+        return
+    end
+
     push!(pop.seqs, copy(pop.seqs[mutation_sequence]))
     push!(pop.freqs, 1)
-    pop.freqs[mutation_sequence] -= 1
-    if rand() < 0.5 && pop.l[mutation_sequence] < pop.L
-        pop.l[mutation_sequence] += 1
+    push!(pop.l, pop.l[mutation_sequence])
 
-    elseif pop.l[mutation_sequence] > 2
-        pop.l[mutation_sequence] -=1
-    end
+    pop.freqs[mutation_sequence] -= 1
+    pop.l[end] += var
     # Remove extinct species
     remove_empty!(pop.freqs, pop.seqs, pop.l)
 end
@@ -119,21 +126,49 @@ function bp_substitution!(pop::populations, emat::Array{T, 2}, fitness_function:
     # Exclude self mutations
     poss_bases = filter(x->x != pop.seqs[1][mutation_base], collect(1:pop.n))
     # Choose random new base
-    temp_pop = copy(pop)
-    temp_pop[1][mutation_base] = rand(poss_bases)
+    temp_pop = deepcopy(pop)
+    temp_pop.seqs[1][mutation_base] = rand(poss_bases)
     # Compute energies
     E = get_energy(pop, emat)
     E_mutant = get_energy(temp_pop, emat)
     # Compute fitness and selection coefficients
-    F = fitness(E[1], pop)
-    F_mutant = fitness(E_mutant[1], temp_pop)
+    F = fitness(E[1], pop.l[1] fitness_function)
+    F_mutant = fitness(E_mutant[1], pop.l[1], fitness_function)
     s = F_mutant - F
     # Accept mutatant depending on Kimura probability
-    if rand() < kimura(pop.N, s)
-        pop = temp_pop
+    if rand() < kimura_prob(pop.N, s)
+        pop.seqs = temp_pop.seqs
     end
 end
 
+
+function l_substitution!(pop::populations, emat::Array{T, 2}, fitness_function::fitness_functions) where {T<:Real}
+    if length(pop.seqs) > 1
+        throw(ArgumentError("Input population has more than one species."))
+    end
+
+    if rand() < 0.5 && pop.l[1] < pop.L
+        var = 1
+    elseif pop.l[1] > 2
+        var = -1
+    else
+        return
+    end
+    # Choose random new base
+    temp_pop = deepcopy(pop)
+    temp_pop.l[1] += var
+    # Compute energies
+    E = get_energy(pop, emat)
+    E_mutant = get_energy(temp_pop, emat)
+    # Compute fitness and selection coefficients
+    F = fitness(E[1], pop.l[1], fitness_function)
+    F_mutant = fitness(E_mutant[1], temp_pop.l[1], fitness_function)
+    s = F_mutant - F
+    # Accept mutatant depending on Kimura probability
+    if rand() < kimura_prob(pop.N, s)
+        pop.l = temp_pop.l
+    end
+end
 
 
 function kimura_prob(N, s)
@@ -143,6 +178,3 @@ function kimura_prob(N, s)
         return (1 - exp(-2s)) / (1 - exp(-2N * s))
     end
 end
-
-
-Base.copy(x::populations) = Base.copy(x)

@@ -44,7 +44,7 @@ function get_energy(pop::driver_trailer_l, emat::Array{T, 2}) where {T<:Real}
     c = length(pop.seqs)
     energy = zeros(Float64, c)
     for j in 1:c
-        for i in eachindex(1:pop.l[j])
+        for i in 1:pop.l[j]
             energy[j] += emat[pop.seqs[j][i], pop.driver[i]]
         end
     end
