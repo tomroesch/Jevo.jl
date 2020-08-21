@@ -109,6 +109,40 @@ end
         @test tmp_driver != pop2.driver
         @test sum(tmp_driver .!= pop2.driver) == 1
     end
+    @testset "Length mutation" begin
+        pop = Jedi.driver_trailer_l(N=4, L=10, n=4, m=12)
+        Jedi.initiate_rand!(pop, 1, driver=collect(1:12))
+        Jedi.mutation!(pop)
+        # Test that new species is created
+        @test length(pop.seqs) == 2
+        @test length(pop.freqs) == 2
+        @test length(pop.l) == 2
+
+        pop2 = Jedi.driver_trailer_l(N=4, L=10, n=4, m=4)
+        Jedi.initiate_rand!(pop2, 3)
+        tmp_driver = copy(pop2.driver)
+        Jedi.driver_mutation!(pop2)
+        # Test that driver sequence is mutated
+        @test tmp_driver != pop2.driver
+        @test sum(tmp_driver .!= pop2.driver) == 1
+
+        pop3 = Jedi.driver_trailer_l(N=1, L=10, n=4, m=4)
+        Jedi.initiate_rand!(pop3, 1)
+        Jedi.mutation!(pop3)
+        # Test that new species is created
+        @test length(pop3.seqs) == 1
+        @test length(pop3.freqs) == 1
+        @test length(pop3.l) == 1
+
+
+        pop4 = Jedi.driver_trailer_l(N=1, L=10, n=4, m=4)
+        Jedi.initiate_rand!(pop4, 1)
+        Jedi.length_mutation!(pop4)
+        # Test that new species is created
+        @test length(pop4.seqs) == 1
+        @test length(pop4.freqs) == 1
+        @test length(pop4.l) == 1
+    end
 end
 
 @testset "Substitutions" begin
@@ -121,9 +155,12 @@ end
 
     pop = Jedi.driver_trailer(N=4, l=10, n=4, m=4)
     Jedi.initiate_rand!(pop, 1)
-    temp_seqs = copy(pop.seqs)
-    Jedi.bp_substitution!(pop, emat, f)
-    @test length(pop.seqs[1]) == 1
-    @test sum(temp_seqs[1] .!= pop.seqs[1]) == 1
+    temp_seqs = deepcopy(pop.seqs)
 
+    Jedi.bp_substitution!(pop, emat, f)
+
+    @test length(pop.seqs) == 1
+    @test length(pop.seqs[1]) == 10
+
+    @test sum(temp_seqs[1] .!= pop.seqs[1]) <= 1
 end

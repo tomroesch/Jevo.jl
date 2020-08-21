@@ -1,4 +1,6 @@
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+ORCA = "47be7bcc-f1a6-5447-8b36-7eeeff7534fd"
+PlotlyJS = "f0f68f2c-4968-5e81-91da-67840de0976a"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
