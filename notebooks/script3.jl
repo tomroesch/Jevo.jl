@@ -1,5 +1,5 @@
 using Distributed, DataFrames, CSV
-addprocs(23)
+addprocs(33)
 
 @everywhere  begin
     using Jedi
@@ -11,13 +11,13 @@ addprocs(23)
     f0 = 20/2N
 end
 rho = [0, 0.1, 0.5, 1., 2]
-E = SharedArray{Float64, 3}(length(rho),23, 1000)
-L = SharedArray{Float64, 3}(length(rho),23, 1000)
-RHO = SharedArray{Float64, 3}(length(rho),23, 1000)
+E = SharedArray{Float64, 3}(length(rho),33, 1000)
+L = SharedArray{Float64, 3}(length(rho),33, 1000)
+RHO = SharedArray{Float64, 3}(length(rho),33, 1000)
 
-l_arr = collect(8:30)
+l_arr = collect(8:40)
 
-@sync @distributed for k in 1:23
+@sync @distributed for k in 1:33
     for r in 1:length(rho)
         f = fermi_fitness(f0=f0, l=l_arr[k])
         for j in 1:1000
