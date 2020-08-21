@@ -1,5 +1,5 @@
 using Distributed, DataFrames
-#addprocs(48)
+addprocs(48)
 
 @everywhere  begin
     using Jedi
@@ -12,8 +12,6 @@ using Distributed, DataFrames
     f0 = 20/2N
     f = fermi_fitness(f0=f0, E_Star=Est)
 end
-
-results = SharedArray{Float64, 3}(2, 4, 100)
 
 rho = [0, 0.1, 0.5, 1., 2]
 E = SharedArray{Float64, 2}(length(rho), 1000)
@@ -34,14 +32,14 @@ RHO = SharedArray{Float64, 2}(length(rho), 1000)
             Jedi.l_substitution!(pop, emat, f)
         end
     end
-    Gamma = sum(get_energy(pop, emat) .* pop.freqs ./ pop.l) / pop.N
-    l_arr = sum(pop.l .* pop.freqs) / pop.N
+    Gamma = get_energy(pop, emat)[1]
+    l_arr = pop.l[1]
     return Gamma, l_arr
 end
 
 @sync @distributed for j in 1:1000
     for r in 1:length(rho)
-        E[r, j], L[r, j] = run(rho[r], 0.01, l)
+        E[r, j], L[r, j] = run(rho[r], 0.01, 10)
         L[r, j] = pop.l[1]
         RHO[r, j] = rho[r]
     end
