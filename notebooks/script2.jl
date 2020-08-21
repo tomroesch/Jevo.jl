@@ -23,7 +23,7 @@ RHO = SharedArray{Float64, 2}(length(rho), 1000)
 @everywhere function run(rho, nu, l)
     pop = driver_trailer_l(N=1000, l_0=l, L=l)
     initiate_rand!(pop, 1)
-    for i in 1:5000000
+    for i in 1:50000000
         Jedi.bp_substitution!(pop, emat, f)
         if rand() < rho/N
             driver_mutation!(pop)
@@ -39,7 +39,7 @@ end
 
 @sync @distributed for j in 1:1000
     for r in 1:length(rho)
-        E[r, j], L[r, j] = run(rho[r], 0.01, 10)
+        E[r, j], L[r, j] = run(rho[r], 0.01, 10) 
         RHO[r, j] = rho[r]
     end
     println("Run $j done.")
