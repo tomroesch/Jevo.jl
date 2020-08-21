@@ -132,7 +132,7 @@ function bp_substitution!(pop::populations, emat::Array{T, 2}, fitness_function:
     E = get_energy(pop, emat)
     E_mutant = get_energy(temp_pop, emat)
     # Compute fitness and selection coefficients
-    F = fitness(E[1], pop.l[1] fitness_function)
+    F = fitness(E[1], pop.l[1], fitness_function)
     F_mutant = fitness(E_mutant[1], pop.l[1], fitness_function)
     s = F_mutant - F
     # Accept mutatant depending on Kimura probability
