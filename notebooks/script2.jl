@@ -40,7 +40,6 @@ end
 @sync @distributed for j in 1:1000
     for r in 1:length(rho)
         E[r, j], L[r, j] = run(rho[r], 0.01, 10)
-        L[r, j] = pop.l[1]
         RHO[r, j] = rho[r]
     end
     println("Run $j done.")
