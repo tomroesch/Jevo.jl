@@ -136,7 +136,7 @@ function bp_substitution!(pop::populations, emat::Array{T, 2}, fitness_function:
     F_mutant = fitness(E_mutant[1], pop.l[1], fitness_function)
     s = F_mutant - F
     # Accept mutatant depending on Kimura probability
-    if rand() < kimura_prob(pop.N, s)
+    if rand() < kimura_prob(s, pop.N)
         pop.seqs = temp_pop.seqs
     end
 end
@@ -165,13 +165,13 @@ function l_substitution!(pop::populations, emat::Array{T, 2}, fitness_function::
     F_mutant = fitness(E_mutant[1], temp_pop.l[1], fitness_function)
     s = F_mutant - F
     # Accept mutatant depending on Kimura probability
-    if rand() < kimura_prob(pop.N, s)
+    if rand() < kimura_prob(s, pop.N)
         pop.l = temp_pop.l
     end
 end
 
 
-function kimura_prob(N, s)
+function kimura_prob(s, N)
     if abs(s) <= 10^-8
         return 1 / N
     else
