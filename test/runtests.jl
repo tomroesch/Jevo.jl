@@ -12,6 +12,7 @@ using Jedi, Test, BenchmarkTools, LinearAlgebra
         @test length.(pop.seqs) == (ones(Int64, 3) .* pop.L)
         # Test warning message
         @test_logs (:warn, "l>L. Choosing L=l.") Jedi.binding_sites(N=4, l=10, L=2, n=4)
+        @test_nowarn Jedi.initiate_rand!(pop, overwrite=true)
     end
 
     @testset "Driver Trailer sites" begin
@@ -25,6 +26,8 @@ using Jedi, Test, BenchmarkTools, LinearAlgebra
         @test length.(pop1.seqs) == (ones(Int64, 3) .* pop1.L)
         # Test length of driver
         @test length(pop1.driver) == pop1.L
+
+        @test_nowarn Jedi.initiate_rand!(pop1, overwrite=true)
 
         pop2 = Jedi.driver_trailer(N=4, l=10, n=4, m=4)
         Jedi.initiate_rand!(pop2, 3, driver=[1, 2, 3, 4])

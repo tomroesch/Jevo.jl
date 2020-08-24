@@ -5,12 +5,12 @@ export initiate_rand!
 
 Iniate a population of c species of random sequences.
 """
-function initiate_rand!(pop::binding_sites, c::Int64; overwrite=false)
+function initiate_rand!(pop::binding_sites, c::Int64=1; overwrite=false)
 
     if ~isempty(pop.seqs)
         # Reiniate existing sequences
         if overwrite
-            c = size(pop.seqs)
+            c = length(pop.seqs)
             pop.freqs .= 0
             N_sub = pop.N ÷ c
             rest = pop.N - N_sub * c
@@ -42,12 +42,12 @@ Iniate a population of c species of random sequences and a driver sequence, whic
 If the given sequence is shorter than the required length, the remaining positions will be filled randomly.
 if the given sequence is longer than the required length, only the first `L` bases will be taken.
 """
-function initiate_rand!(pop::driver_trailer, c::Int64; driver::Array{Int64, 1}=Int64[], overwrite=false)
+function initiate_rand!(pop::driver_trailer, c::Int64=1; driver::Array{Int64, 1}=Int64[], overwrite=false)
 
     if ~isempty(pop.seqs)
         # Reiniate existing sequences
         if overwrite
-            c = size(pop.seqs)
+            c = length(pop.seqs)
             pop.freqs .= 0
             N_sub = pop.N ÷ c
             rest = pop.N - N_sub * c
