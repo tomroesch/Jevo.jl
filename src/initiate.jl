@@ -47,7 +47,7 @@ function initiate_rand!(pop::driver_trailer, c::Int64; driver::Array{Int64, 1}=I
     if ~isempty(pop.seqs)
         # Reiniate existing sequences
         if overwrite
-            c = size(pops.seqs)
+            c = size(pop.seqs)
             pop.freqs .= 0
             N_sub = pop.N ÷ c
             rest = pop.N - N_sub * c
