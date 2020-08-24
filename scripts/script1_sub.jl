@@ -14,7 +14,7 @@ end
     using SharedArrays
     emat = 2 * (ones(4,4) - Matrix{Float64}(I, 4, 4))
     N = 1000
-    f = fermi_fitness(f0=50/2N)
+    f0 = 50/2N
 end
 
 # Driver mutation rates
