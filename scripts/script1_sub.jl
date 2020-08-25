@@ -1,4 +1,7 @@
-using CSV, DataFrames, Distributed
+using CSV, DataFrames, Distributed, Dates
+
+
+date = Dates.format(Dates.today(), "yyyy_mm_dd")
 
 if length(ARGS) == 1
     addprocs(parse(Int64, ARGS[1]))
@@ -18,7 +21,7 @@ end
 end
 
 # Driver mutation rates
-rho = [0, 0.1, 0.5, 1., 2]
+rho = [0, 0.1, 0.5, 1., 2, 4]
 
 # Lengths
 l_arr = collect(8:40)
@@ -55,4 +58,4 @@ end
 
 # Store results in a DataFrame
 df = DataFrame(gamma=[(E...)...], l=[(L...)...], rho=[(RHO...)...])
-CSV.write("script1_sub_results.csv", df)
+CSV.write(date*"_script1_sub_results.csv", df)
