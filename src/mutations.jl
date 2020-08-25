@@ -88,11 +88,12 @@ end
 """
     function driver_mutation!(pop::driver_trailer)
 
-Mutate a the length of species.
+Mutate the length of species and create a new species
 """
 function length_mutation!(pop::driver_trailer_l)
     # Choose random sequence depending on subpopulation size
-    mutation_sequence = sample(collect(1:length(pop.seqs)), Weights(pop.freqs ./ pop.N))
+    mutation_sequence = sample( collect(1:length(pop.seqs)),
+                                Weights(pop.freqs ./ pop.N))
     # Add sequence to mutate
 
     if rand() < 0.5 && pop.l[mutation_sequence] < pop.L
@@ -115,7 +116,11 @@ end
 
 
 """
+    bp_substitution!(pop::populations, emat::Array{T, 2}, fitness_function::fitness_functions) where {T<:Real}
 
+Attempt a base pair substitution. The population has to consist of one species
+only. Mutation is accepted with probability given by the Kimura fixation
+probability.
 """
 function bp_substitution!(pop::populations, emat::Array{T, 2}, fitness_function::fitness_functions) where {T<:Real}
     if length(pop.seqs) > 1
@@ -142,7 +147,20 @@ function bp_substitution!(pop::populations, emat::Array{T, 2}, fitness_function:
 end
 
 
-function l_substitution!(pop::populations, emat::Array{T, 2}, fitness_function::fitness_functions) where {T<:Real}
+"""
+    l_substitution!(
+        pop::driver_trailer_l,
+        emat::Array{T, 2},
+        fitness_function::fitness_functions) where {T<:Real}
+
+Attempt a substitution of a length mutation. Population has to be consisting
+of one species only.
+"""
+function l_substitution!(
+    pop::driver_trailer_l,
+    emat::Array{T, 2},
+    fitness_function::fitness_functions) where {T<:Real}
+
     if length(pop.seqs) > 1
         throw(ArgumentError("Input population has more than one species."))
     end
@@ -171,6 +189,11 @@ function l_substitution!(pop::populations, emat::Array{T, 2}, fitness_function::
 end
 
 
+"""
+    kimura_prob(s, N)
+
+Probability of fixation of a mutation in a monomorphic population.
+"""
 function kimura_prob(s, N)
     if abs(s) <= 10^-8
         return 1 / N
