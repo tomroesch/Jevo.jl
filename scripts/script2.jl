@@ -25,7 +25,7 @@ end
 rho = [0, 0.1, 0.5, 1., 2, 4]
 E = SharedArray{Float64, 2}(length(rho), 1000)
 L = SharedArray{Float64, 2}(length(rho), 1000)
-
+RHO = SharedArray{Float64, 2}(length(rho), 1000)
 @everywhere function run(rho, nu, l)
     pop = driver_trailer_l(N=1000, l_0=l, L=l)
     initiate_rand!(pop, 1)
