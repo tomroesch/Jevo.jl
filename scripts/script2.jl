@@ -15,11 +15,10 @@ end
     using Distributions
     using SharedArrays
     emat = 2 * (ones(4, 4) - Matrix{Float64}(I, 4, 4))
-    Est(l) = 2*(3/4 * l - 5)
     N = 1000
     f0 = 25/2N
     fl = 0.25/2N
-    f = fermi_fitness(f0=f0, E_Star=Est, fl=fl)
+    f = fermi_fitness(f0=f0, fl=fl)
 end
 
 rho = [0, 0.1, 0.5, 1., 2, 4]
@@ -27,7 +26,7 @@ E = SharedArray{Float64, 2}(length(rho), 1000)
 L = SharedArray{Float64, 2}(length(rho), 1000)
 RHO = SharedArray{Float64, 2}(length(rho), 1000)
 @everywhere function run(rho, nu, l)
-    pop = driver_trailer_l(N=1000, l_0=l, L=l)
+    pop = driver_trailer_l(N=1000, l_0=l, L=30)
     initiate_rand!(pop, 1)
     rand_rho = rand(5000000)
     rand_nu = rand(5000000)
