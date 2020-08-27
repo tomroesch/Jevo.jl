@@ -23,8 +23,9 @@ function default_plotlyjs!()
         linewidth=1.25,
         legendtitlefontsize=8,
         legendfontsize=8,
-        legend=(0.9, 0.8),
+        legend=(0.8, 0.8),
         foreground_color_legend="#E3DCD0",
-        color_palette=:seaborn_colorblind
+        color_palette=:seaborn_colorblind,
+        label=:none
     )
 end

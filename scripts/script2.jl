@@ -1,5 +1,13 @@
-using Distributed, DataFrames
-addprocs(48)
+using CSV, DataFrames, Distributed, Dates
+
+
+date = Dates.format(Dates.today(), "yyyy_mm_dd")
+
+if length(ARGS) == 1
+    addprocs(parse(Int64, ARGS[1]))
+elseif length(ARGS) > 1
+    throw(ArgumentError("Only one command line argument (cores)."))
+end
 
 @everywhere  begin
     using Jedi
@@ -9,11 +17,12 @@ addprocs(48)
     emat = 2 * (ones(4, 4) - Matrix{Float64}(I, 4, 4))
     Est(l) = 2*(3/4 * l - 5)
     N = 1000
-    f0 = 20/2N
-    f = fermi_fitness(f0=f0, E_Star=Est)
+    f0 = 25/2N
+    fl = 0.25/2N
+    f = fermi_fitness(f0=f0, E_Star=Est, fl=fl)
 end
 
-rho = [0, 0.1, 0.5, 1., 2]
+rho = [0, 0.1, 0.5, 1., 2, 4]
 E = SharedArray{Float64, 2}(length(rho), 1000)
 L = SharedArray{Float64, 2}(length(rho), 1000)
 RHO = SharedArray{Float64, 2}(length(rho), 1000)
@@ -23,12 +32,14 @@ RHO = SharedArray{Float64, 2}(length(rho), 1000)
 @everywhere function run(rho, nu, l)
     pop = driver_trailer_l(N=1000, l_0=l, L=l)
     initiate_rand!(pop, 1)
-    for i in 1:50000000
+    rand_rho = rand(5000000)
+    rand_nu = rand(5000000)
+    for i in 1:5000000
         Jedi.bp_substitution!(pop, emat, f)
-        if rand() < rho/N
+        if rand_rho[i] < rho/N
             driver_mutation!(pop)
         end
-        if rand() < nu/N
+        if rand_nu[i] < nu/N
             Jedi.l_substitution!(pop, emat, f)
         end
     end
@@ -47,4 +58,4 @@ end
 
 
 df = DataFrame(gamma=[(E...)...], l=[(L...)...], rho=[(RHO...)...])
-CSV.write("script2_results.csv", df)
+CSV.write(date*"script2_results.csv", df)

@@ -42,6 +42,17 @@ end
 
 
 """
+    function fitness(E::Float64, p::fermi_fitness)
+
+Evaluate fermi fitness function.
+"""
+function _dE_fitness(E::Real, p::fermi_fitness)
+    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(p.l))))^2 * p.beta * exp(p.beta * (E - p.E_Star(p.l)))
+    return dfitness
+end
+
+
+"""
     function fitness(E::Float64, l::Int64, p::fermi_fitness)
 
 Evaluate fermi fitness function.
@@ -49,6 +60,17 @@ Evaluate fermi fitness function.
 function _fitness(E::Real, l::Int64, p::fermi_fitness)
     fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(l))))) - p.fl * l)
     return fitness
+end
+
+
+"""
+    function fitness(E::Float64, p::fermi_fitness)
+
+Evaluate fermi fitness function.
+"""
+function _dE_fitness(E::Real, l::Int64, p::fermi_fitness)
+    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(l))))^2 * p.beta * exp(p.beta * (E - p.E_Star(l)))
+    return dfitness
 end
 
 
@@ -104,3 +126,11 @@ Broadcast.broadcasted(::typeof(fitness), E, l, p) = broadcast(_fitness, E, l, Re
 
 fitness(E, p) = _fitness(E, p)
 Broadcast.broadcasted(::typeof(fitness), E, p) = broadcast(_fitness, E, Ref(p))
+
+
+dE_fitness(E, l, p) = _dE_fitness(E, l, p)
+Broadcast.broadcasted(::typeof(dE_fitness), E, l, p) = broadcast(_dE_fitness, E, l, Ref(p))
+
+
+dE_fitness(E, p) = _dE_fitness(E, p)
+Broadcast.broadcasted(::typeof(dE_fitness), E, p) = broadcast(_dE_fitness, E, Ref(p))
