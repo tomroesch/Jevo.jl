@@ -1,6 +1,6 @@
 using StatsBase
 
-export mutation!,driver_mutation!,length_mutation!
+export mutation!,driver_mutation!,length_mutation!,kimura_prob,l_substitution!,bp_substitution!
 
 """
     function mutation!(pop::populations)

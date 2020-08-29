@@ -1,4 +1,4 @@
-export initiate_rand!
+export initiate_rand!,initiate_opt!
 
 """
     function initiate_rand!(pop::binding_sites, c::Int64; overwrite=false)
@@ -141,5 +141,42 @@ function initiate_rand!(pop::driver_trailer_l, c::Int64; driver::Array{Int64, 1}
                 pop.driver[:] = driver[1:pop.L]
             end
         end
+    end
+end
+
+
+"""
+    function initiate_opt!(pop::driver_trailer_l; driver::Array{Int64, 1}=Int64[], overwrite=false)
+
+Iniate a population of a single species which is optimally adapted.
+"""
+function initiate_opt!(pop::driver_trailer_l; driver::Array{Int64, 1}=Int64[])
+
+    if isempty(driver)
+        pop.driver[:] = rand(collect(1:pop.m), pop.L)
+    else
+        if any(driver .> pop.m)
+            throw(ArgumentError("Driver sequence has elements outside of alphabet."))
+        elseif any(driver .< 0)
+            throw(ArgumentError("Don't include negative elements in driver sequence."))
+        end
+        if length(driver) == pop.L
+            pop.driver[:] = driver
+        elseif length(driver) < pop.L
+            pop.driver[1:length(driver)] = driver
+            pop.driver[length(driver)+1:end] = rand(collect(1:pop.m), pop.L-length(driver))
+        else
+            pop.driver[:] = driver[1:pop.L]
+        end
+    end
+
+    if isempty(pop.seqs)
+        push!(pop.seqs, pop.driver)
+        push!(pop.freqs, pop.N)
+        push!(pop.l, pop.l_0)
+    else
+        pop.seqs[1] = pop.driver
+        pop.freqs[1] = pop.N
+        pop.l[1] = pop.l_0
     end
 end
