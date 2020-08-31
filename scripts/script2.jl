@@ -1,4 +1,4 @@
-using CSV, DataFrames, Distributed, Dates
+using CSV, DataFrames, Distributed, Dates, LinearAlgebra
 
 # Get date to append to output file
 date = Dates.format(Dates.today(), "yyyy_mm_dd")
@@ -13,28 +13,38 @@ end
 # Import packages needed for all workers
 @everywhere  begin
     using Jedi
-    using LinearAlgebra
     using Distributions
     using SharedArrays
-    emat = 2 * (ones(4, 4) - Matrix{Float64}(I, 4, 4))
-    N = 1000
-    f0 = 25/2N
-    fl = 0.25/2N
-    f = fermi_fitness(f0=f0, fl=fl)
 end
 
-
+# Parameters
+reps = 200
+steps = 10^8
 rho = [0, 0.1, 0.5, 1., 2]
-E = SharedArray{Float64, 2}(length(rho), 200)
-L = SharedArray{Float64, 2}(length(rho), 200)
-RHO = SharedArray{Float64, 2}(length(rho), 200)
+l_0 = 15
+N = 1000
+nu = 1/N
+emat = 2 * (ones(4, 4) - Matrix{Float64}(I, 4, 4))
+f0 = 25/2N
+fl = 0.25/2N
 
-@everywhere function run(rho, nu, l)
-    pop = driver_trailer_l(N=1000, l_0=l, L=50)
+# Arrays for results
+E = SharedArray{Float64, 2}(length(rho), reps)
+L = SharedArray{Float64, 2}(length(rho), reps)
+RHO = SharedArray{Float64, 2}(length(rho), reps)
+
+# Function to run one simulation
+@everywhere function run(N, f0, fl, rho, nu, l_0, emat, steps)
+    # Initiate population
+    pop = driver_trailer_l(N=N, l_0=l_0, L=50)
     initiate_opt!(pop)
-    rand_rho = rand(100000000)
-    rand_nu = rand(100000000)
-    for i in 1:100000000
+    # Pregenerate random numbers
+    rand_rho = rand(steps)
+    rand_nu = rand(steps)
+    # Initiate fitness landscape
+    f = fermi_fitness(f0=f0, fl=fl)
+
+    for i in 1:steps
         bp_substitution!(pop, emat, f)
         if rand_rho[i] < rho/N
             driver_mutation!(pop)
@@ -52,14 +62,27 @@ RHO = SharedArray{Float64, 2}(length(rho), 200)
     return Gamma, l_arr
 end
 
-@sync @distributed for j in 1:200
+# Run simulations on all available workers
+@sync @distributed for j in 1:reps
     for r in 1:length(rho)
-        E[r, j], L[r, j] = run(rho[r], 0.001, 15)
+        E[r, j], L[r, j] = run(N, f0, fl, rho[r], nu, l_0, emat, steps)
         RHO[r, j] = rho[r]
     end
     println("Run $j done.")
 end
 
-
+# Save results
 df = DataFrame(gamma=[(E...)...], l=[(L...)...], rho=[(RHO...)...])
 CSV.write(date*"_script2_results.csv", df)
+
+# Write Metadata
+open(date*"_script2_results_METADATA.txt", "a") do io
+    write(io, "N=$N\n")
+    write(io, "f0=$f0\n")
+    write(io, "fl=$fl\n")
+    write(io, "repetitions=$reps\n")
+    write(io, "steps=$steps\n")
+    write(io, "rho=$rho\n")
+    write(io, "nu=$nu\n")
+    write(io, "l_0=$l_0\n")
+end
