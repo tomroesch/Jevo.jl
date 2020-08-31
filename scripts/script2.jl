@@ -18,23 +18,23 @@ end
     using SharedArrays
     emat = 2 * (ones(4, 4) - Matrix{Float64}(I, 4, 4))
     N = 1000
-    f0 = 50/2N
-    fl = 0.3/2N
+    f0 = 25/2N
+    fl = 0.25/2N
     f = fermi_fitness(f0=f0, fl=fl)
 end
 
 
-rho = [0, 0.1, 0.25, 0.5, 1., 2]
-E = SharedArray{Float64, 2}(length(rho), 1000)
-L = SharedArray{Float64, 2}(length(rho), 1000)
-RHO = SharedArray{Float64, 2}(length(rho), 1000)
+rho = [0, 0.1, 0.5, 1., 2]
+E = SharedArray{Float64, 2}(length(rho), 200)
+L = SharedArray{Float64, 2}(length(rho), 200)
+RHO = SharedArray{Float64, 2}(length(rho), 200)
 
 @everywhere function run(rho, nu, l)
-    pop = driver_trailer_l(N=1000, l_0=l, L=40)
+    pop = driver_trailer_l(N=1000, l_0=l, L=50)
     initiate_opt!(pop)
-    rand_rho = rand(50000000)
-    rand_nu = rand(50000000)
-    for i in 1:50000000
+    rand_rho = rand(100000000)
+    rand_nu = rand(100000000)
+    for i in 1:100000000
         bp_substitution!(pop, emat, f)
         if rand_rho[i] < rho/N
             driver_mutation!(pop)
@@ -42,7 +42,6 @@ RHO = SharedArray{Float64, 2}(length(rho), 1000)
         if rand_nu[i] < nu
             l_substitution!(pop, emat, f)
         end
-
         # Recover lost sites
         if pop.l[1] < 7
             initiate_opt!(pop)
@@ -53,7 +52,7 @@ RHO = SharedArray{Float64, 2}(length(rho), 1000)
     return Gamma, l_arr
 end
 
-@sync @distributed for j in 1:1000
+@sync @distributed for j in 1:200
     for r in 1:length(rho)
         E[r, j], L[r, j] = run(rho[r], 0.001, 15)
         RHO[r, j] = rho[r]
