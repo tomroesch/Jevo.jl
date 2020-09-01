@@ -53,7 +53,7 @@ RHO = SharedArray{Float64, 2}(length(rho), reps)
             l_substitution!(pop, emat, f)
         end
         # Recover lost sites
-        if pop.l[1] < 7
+        if pop.l[1] < 7 || get_energy(pop, emat)[1] > pop.(Jedi.Est(pop.l[1])+4)
             initiate_opt!(pop)
         end
     end
