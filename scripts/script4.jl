@@ -38,12 +38,12 @@ RHO = SharedArray{Float64, 3}(length(rho), reps, 1000)
     # Initiate population
     pop = mono_pop(N=1000, l=15)
     initiate!(pop, opt=true)
-    rand_rho = rand(reps)
-    rand_nu = rand(reps)
+    rand_rho = rand(steps)
+    rand_nu = rand(steps)
     f = fermi_fitness(f0=f0, fl=fl)
     Gamma = zeros(Float64, 1000)
     l_arr = zeros(Int64, 1000)
-    for i in 1:reps
+    for i in 1:steps
         bp_substitution!(pop, emat, f)
         if rand_rho[i] < rho/N
             driver_mutation!(pop)
