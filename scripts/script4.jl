@@ -29,9 +29,9 @@ f0 = 50/2N
 fl = 0.3/2N
 
 # Arrays for results
-E = SharedArray{Float64, 2}(length(rho), reps, 1000)
-L = SharedArray{Float64, 2}(length(rho), reps, 1000)
-RHO = SharedArray{Float64, 2}(length(rho), reps, 1000)
+E = SharedArray{Float64, 3}(length(rho), reps, 1000)
+L = SharedArray{Float64, 3}(length(rho), reps, 1000)
+RHO = SharedArray{Float64, 3}(length(rho), reps, 1000)
 
 # Function to run one simulation
 @everywhere function run(N, f0, fl, rho, nu, l_0, emat, steps)
