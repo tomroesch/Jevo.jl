@@ -1,11 +1,16 @@
-export initiate_rand!,initiate_opt!
+export initiate!,make_driver
 
 """
-    function initiate_rand!(pop::binding_sites, c::Int64; overwrite=false)
+    function initiate!(pop::binding_sites, c::Int64; overwrite=false)
 
-Iniate a population of c species of random sequences.
+Iniate a population of random sequences.
+
+# Arguments
+- `pop::binding_sites`: population that is to be filled.
+- `c::Int64=1`: number of species to create.
+- `overwrite::Bool=false`: If `true`, resets a given population to equal subspecies size.
 """
-function initiate_rand!(pop::binding_sites, c::Int64=1; overwrite=false)
+function initiate!(pop::binding_sites, c::Int64=1; overwrite::Bool=false)
 
     if ~isempty(pop.seqs)
         # Reiniate existing sequences
@@ -36,13 +41,34 @@ end
 
 
 """
-    function initiate_rand!(pop::driver_trailer, c::Int64; driver::Array{Int64, 1}=Int64[], overwrite=false)
+    function initiate!(
+        pop::driver_trailer,
+        c::Int64;
+        driver::Array{Int64, 1}=Int64[],
+        overwrite::Bool=false,
+        opt::Bool=false)
 
-Iniate a population of c species of random sequences and a driver sequence, which can be given.
-If the given sequence is shorter than the required length, the remaining positions will be filled randomly.
-if the given sequence is longer than the required length, only the first `L` bases will be taken.
+Initiates population.
+
+
+Creates a population of type `driver_trailer`, where a driver sequence can be given.
+Given driver sequence can be shorter or longer than initial binding site length. Sequence
+will be either filled with random letters or truncated to the right length.
+
+# Arguments
+- `pop::driver_trailer`: population that is to be filled.
+- `c::Int64=1`: number of species to create.
+- `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
+- `overwrite::Bool=false`: If `true`, resets a given population to equal subspecies size.
+- `opt::Bool="false"`: If `true`, copies driver to seq. If `false`, creates random sequence.
 """
-function initiate_rand!(pop::driver_trailer, c::Int64=1; driver::Array{Int64, 1}=Int64[], overwrite=false)
+function initiate!(
+    pop::driver_trailer,
+    c::Int64=1;
+    driver::Array{Int64, 1}=Int64[],
+    overwrite::Bool=false,
+    opt::Bool=false
+    )
 
     if ~isempty(pop.seqs)
         # Reiniate existing sequences
@@ -59,43 +85,53 @@ function initiate_rand!(pop::driver_trailer, c::Int64=1; driver::Array{Int64, 1}
             return
         end
     else
+        pop.driver[:] = make_driver(driver, pop.m, pop.L)
         # Create new population
-        N_sub = pop.N ÷ c
-        rest = pop.N - N_sub * c
-        for i in 1:c
-            push!(pop.seqs, rand(collect(1:pop.n), pop.L))
-            push!(pop.freqs, N_sub)
-        end
-        pop.freqs[1] += rest
-        if isempty(driver)
-            pop.driver[:] = rand(collect(1:pop.m), pop.L)
+        if ~opt
+            N_sub = pop.N ÷ c
+            rest = pop.N - N_sub * c
+            for i in 1:c
+                push!(pop.seqs, rand(collect(1:pop.n), pop.L))
+                push!(pop.freqs, N_sub)
+            end
+            pop.freqs[1] += rest
         else
-            if any(driver .> pop.m)
-                throw(ArgumentError("Driver sequence has elements outside of alphabet."))
-            elseif any(driver .< 0)
-                throw(ArgumentError("Don't include negative elements in driver sequence."))
-            end
-            if length(driver) == pop.L
-                pop.driver[:] = driver
-            elseif length(driver) < pop.L
-                pop.driver[1:length(driver)] = driver
-                pop.driver[length(driver)+1:end] = rand(collect(1:pop.m), pop.L-length(driver))
-            else
-                pop.driver[:] = driver[1:pop.L]
-            end
+            push!(pop.freqs, pop.N)
+            push!(pop.seqs, pop.driver)
         end
     end
 end
 
 
 """
-    function initiate_rand!(pop::driver_trailer_l, c::Int64; driver::Array{Int64, 1}=Int64[], overwrite=false)
+    function initiate!(
+        pop::driver_trailer_l,
+        c::Int64;
+        driver::Array{Int64, 1}=Int64[],
+        overwrite=false,
+        opt::Bool=false)
 
-Iniate a population of c species of random sequences and a driver sequence, which can be given.
-If the given sequence is shorter than the required length, the remaining positions will be filled randomly.
-if the given sequence is longer than the required length, only the first `L` bases will be taken.
+Iniate a population of c species of and a driver sequence, which can be given.
+
+Creates a population of type `driver_trailerPl`, where a driver sequence can be given.
+Given driver sequence can be shorter or longer than initial binding site length. Sequence
+will be either filled with random letters or truncated to the right length.
+
+
+# Arguments
+- `pop::driver_trailer`: population that is to be filled.
+- `c::Int64=1`: number of species to create.
+- `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
+- `overwrite::Bool=false`: If `true`, resets a given population to equal subspecies size.
+- `opt::Bool="false"`: If `true`, copies driver to seq. If `false`, creates `c` random sequences.
 """
-function initiate_rand!(pop::driver_trailer_l, c::Int64; driver::Array{Int64, 1}=Int64[], overwrite=false)
+function initiate!(
+    pop::driver_trailer_l,
+    c::Int64=1;
+    driver::Array{Int64, 1}=Int64[],
+    overwrite::Bool=false,
+    opt::Bool=false
+    )
 
     if ~isempty(pop.seqs)
         # Reiniate existing sequences
@@ -113,70 +149,87 @@ function initiate_rand!(pop::driver_trailer_l, c::Int64; driver::Array{Int64, 1}
             return
         end
     else
-        # Create new population
-        N_sub = pop.N ÷ c
-        rest = pop.N - N_sub * c
-        for i in 1:c
-            push!(pop.seqs, rand(collect(1:pop.n), pop.L))
-            push!(pop.freqs, N_sub)
-        end
-        pop.freqs[1] += rest
+        pop.driver[:] = make_driver(driver, pop.m, pop.L)
 
-        pop.l = ones(Int64, c) * pop.l_0
+        if ~opt
+            # Create new population
+            N_sub = pop.N ÷ c
+            rest = pop.N - N_sub * c
+            for i in 1:c
+                push!(pop.seqs, rand(collect(1:pop.n), pop.L))
+                push!(pop.freqs, N_sub)
+            end
+            pop.freqs[1] += rest
 
-        if isempty(driver)
-            pop.driver[:] = rand(collect(1:pop.m), pop.L)
+            pop.l = ones(Int64, c) * pop.l_0
         else
-            if any(driver .> pop.m)
-                throw(ArgumentError("Driver sequence has elements outside of alphabet."))
-            elseif any(driver .< 0)
-                throw(ArgumentError("Don't include negative elements in driver sequence."))
-            end
-            if length(driver) == pop.L
-                pop.driver[:] = driver
-            elseif length(driver) < pop.L
-                pop.driver[1:length(driver)] = driver
-                pop.driver[length(driver)+1:end] = rand(collect(1:pop.m), pop.L-length(driver))
-            else
-                pop.driver[:] = driver[1:pop.L]
-            end
+            push!(pop.seqs, pop.driver)
+            push!(pop.freqs, pop.N)
+            push!(pop.l, pop.l_0)
         end
+
+    end
+end
+
+
+
+"""
+    function initiate!(
+        pop::mono_pop;
+        driver::Array{Int64, 1}=Int64[],
+        opt::Bool=false)
+
+Iniate a monomorphic population and a driver sequence, which can be given.
+
+Creates a population of type `mono_pop`, where a driver sequence can be given.
+Given driver sequence can be shorter or longer than initial binding site length. Sequence
+will be either filled with random letters or truncated to the right length.
+
+
+# Arguments
+- `pop::driver_trailer`: population that is to be filled.
+- `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
+- `opt::Bool=false`: If `false`, creates random sequence. If `true`, copies driver sequence.
+"""
+function initiate!(
+    pop::mono_pop;
+    driver::Array{Int64, 1}=Int64[],
+    opt::Bool=false
+    )
+
+    pop.driver = make_driver(driver, pop.m, pop.l)
+
+    if ~opt
+        pop.seqs =  rand(collect(1:pop.n), pop.l)
+    else
+        pop.seqs = pop.driver
     end
 end
 
 
 """
-    function initiate_opt!(pop::driver_trailer_l; driver::Array{Int64, 1}=Int64[], overwrite=false)
+    make_driver(given_driver, m, L)
 
-Iniate a population of a single species which is optimally adapted.
+Create a driver sequence.
 """
-function initiate_opt!(pop::driver_trailer_l; driver::Array{Int64, 1}=Int64[])
-
-    if isempty(driver)
-        pop.driver[:] = rand(collect(1:pop.m), pop.L)
+function make_driver(given_driver, m, L)
+    driver = zeros(Int64, L)
+    if isempty(given_driver)
+        driver[:] = rand(collect(1:m), L)
     else
-        if any(driver .> pop.m)
+        if any(given_driver .> m)
             throw(ArgumentError("Driver sequence has elements outside of alphabet."))
-        elseif any(driver .< 0)
+        elseif any(given_driver .< 0)
             throw(ArgumentError("Don't include negative elements in driver sequence."))
         end
-        if length(driver) == pop.L
-            pop.driver[:] = driver
-        elseif length(driver) < pop.L
-            pop.driver[1:length(driver)] = driver
-            pop.driver[length(driver)+1:end] = rand(collect(1:pop.m), pop.L-length(driver))
+        if length(given_driver) == L
+            driver[:] = given_driver
+        elseif length(given_driver) < L
+            driver[1:length(given_driver)] = given_driver
+            driver[length(given_driver) + 1:end] = rand(collect(1:m), L - length(given_driver))
         else
-            pop.driver[:] = driver[1:pop.L]
+            driver[:] = given_driver[1:L]
         end
     end
-
-    if isempty(pop.seqs)
-        push!(pop.seqs, pop.driver)
-        push!(pop.freqs, pop.N)
-        push!(pop.l, pop.l_0)
-    else
-        pop.seqs[1] = pop.driver
-        pop.freqs[1] = pop.N
-        pop.l[1] = pop.l_0
-    end
+    return driver
 end

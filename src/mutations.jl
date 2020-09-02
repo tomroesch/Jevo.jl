@@ -70,6 +70,7 @@ function mutation!(pop::driver_trailer_l)
     remove_empty!(pop.freqs, pop.seqs, pop.l)
 end
 
+
 """
     function driver_mutation!(pop::DT_population)
 
@@ -77,7 +78,7 @@ Mutate a random base in the driver sequence.
 """
 function driver_mutation!(pop::DT_population)
     # Choose random base to mutate
-    mutation_base = rand(1:pop.L)
+    mutation_base = rand(1:length(pop.driver))
     # Exclude self mutations
     poss_bases = filter(x->x != pop.driver[mutation_base], collect(1:pop.m))
     # Choose random new base
@@ -112,6 +113,36 @@ function length_mutation!(pop::driver_trailer_l)
     pop.l[end] += var
     # Remove extinct species
     remove_empty!(pop.freqs, pop.seqs, pop.l)
+end
+
+
+"""
+    bp_substitution!(pop::mono_pop, emat::Array{T, 2}, fitness_function::fitness_functions) where {T<:Real}
+
+Attempt a base pair substitution. The population has to consist of one species
+only. Mutation is accepted with probability given by the Kimura fixation
+probability.
+"""
+function bp_substitution!(pop::mono_pop, emat::Array{T, 2}, fitness_function::fitness_functions) where {T<:Real}
+
+    # Choose random base to mutate
+    mutation_base = rand(eachindex(pop.seqs))
+    # Exclude self mutations
+    possible_bases = filter(x->x != pop.seqs[mutation_base], collect(1:pop.n))
+    # Choose random new base
+    temp_pop = deepcopy(pop)
+    temp_pop.seqs[mutation_base] = rand(possible_bases)
+    # Compute energies
+    E = get_energy(pop, emat)
+    E_mutant = get_energy(temp_pop, emat)
+    # Compute fitness and selection coefficients
+    F = fitness(E, length(pop.seqs), fitness_function)
+    F_mutant = fitness(E_mutant, length(pop.seqs), fitness_function)
+    s = F_mutant - F
+    # Accept mutatant depending on Kimura probability
+    if rand() < kimura_prob(s, pop.N)
+        pop.seqs = temp_pop.seqs
+    end
 end
 
 
@@ -185,6 +216,43 @@ function l_substitution!(
     # Accept mutatant depending on Kimura probability
     if rand() < kimura_prob(s, pop.N)
         pop.l = temp_pop.l
+    end
+end
+
+
+"""
+    l_substitution!(
+        pop::mono_pop,
+        emat::Array{T, 2},
+        fitness_function::fitness_functions) where {T<:Real}
+
+Attempt a substitution of a length mutation. Population has to be consisting
+of one species only.
+"""
+function l_substitution!(
+    pop::mono_pop,
+    emat::Array{T, 2},
+    fitness_function::fitness_functions) where {T<:Real}
+
+    temp_pop = deepcopy(pop)
+    if rand() < 0.5 && pop.l > 1
+        push!(temp_pop.seqs, rand(1:pop.n))
+        push!(temp_pop.driver, rand(1:pop.m))
+    else
+        pop!(temp_pop.seqs)
+        pop!(temp_pop.driver)
+    end
+    # Compute energies
+    E = get_energy(pop, emat)
+    E_mutant = get_energy(temp_pop, emat)
+    # Compute fitness and selection coefficients
+    F = fitness(E, length(pop.seqs), fitness_function)
+    F_mutant = fitness(E_mutant, length(temp_pop.seqs), fitness_function)
+    s = F_mutant - F
+    # Accept mutatant depending on Kimura probability
+    if rand() < kimura_prob(s, pop.N)
+        pop.seqs = temp_pop.seqs
+        pop.driver = temp_pop.driver
     end
 end
 

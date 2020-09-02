@@ -52,6 +52,21 @@ function get_energy(pop::driver_trailer_l, emat::Array{T, 2}) where {T<:Real}
 end
 
 
+"""
+    get_energy(pop::mono_pop, emat::Array{T, 2}) where {T<:Real}
+
+Compute binding energies in monomorphic population..
+"""
+function get_energy(pop::mono_pop, emat::Array{T, 2}) where {T<:Real}
+
+    energy = 0
+    for i in eachindex(pop.seqs)
+        energy += emat[pop.seqs[i], pop.driver[i]]
+    end
+    return energy
+end
+
+
 function remove_empty!(array_list...)
     main_arr = array_list[1]
     inds = findall(x->x==0, main_arr)
