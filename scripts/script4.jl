@@ -18,7 +18,7 @@ end
 end
 
 # Parameters
-reps = 400
+reps = 200
 steps = 2 * 10^8
 rho = [0, 0.1, 0.5, 1., 2]
 l_0 = 15
