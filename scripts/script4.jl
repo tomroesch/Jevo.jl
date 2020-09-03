@@ -14,11 +14,11 @@ end
 @everywhere  begin
     using Jedi
     using Distributions
-    using SharedArrays
+    using DelimitedFiles
 end
 
 # Parameters
-reps = 400
+reps = 200
 steps = 2 * 10^8
 rho = [0, 0.1, 0.5, 1., 2]
 l_0 = 15
@@ -28,10 +28,6 @@ emat = 2 * (ones(4, 4) - Matrix{Float64}(I, 4, 4))
 f0 = 50/2N
 fl = 0.3/2N
 
-# Arrays for results
-E = SharedArray{Float64, 3}(length(rho), reps, 1000)
-L = SharedArray{Float64, 3}(length(rho), reps, 1000)
-RHO = SharedArray{Float64, 3}(length(rho), reps, 1000)
 
 # Function to run one simulation
 @everywhere function run(N, f0, fl, rho, nu, l_0, emat, steps)
@@ -62,7 +58,7 @@ RHO = SharedArray{Float64, 3}(length(rho), reps, 1000)
     end
     return Gamma, l_arr
 end
-
+#=
 # Run simulations on all available workers
 @sync @distributed for j in 1:reps
     for r in 1:length(rho)
@@ -75,7 +71,7 @@ end
 # Save results
 df = DataFrame(gamma=[(E...)...], l=[(L...)...], rho=[(RHO...)...])
 CSV.write(date*"_script4_results.csv", df)
-
+=#
 # Write Metadata
 open(date*"_script4_results_METADATA.txt", "a") do io
     write(io, "N=$N\n")
@@ -86,4 +82,20 @@ open(date*"_script4_results_METADATA.txt", "a") do io
     write(io, "rho=$rho\n")
     write(io, "nu=$nu\n")
     write(io, "l_0=$l_0\n")
+end
+
+open(date*"_script4_results.csv", "w") do io
+   write(io, "rho\tl\tGamma\n")
+end
+
+# Run simulations on all available workers
+@sync @distributed for j in 1:reps
+    for r in 1:length(rho)
+        E, L = run(N, f0, fl, rho[r], nu, l_0, emat, steps)
+        RHO = rho[r] .* ones(Float64, 1000)
+        open(date*"_script4_results.csv", "a") do io
+            writedlm(io, [RHO L E])
+        end
+    end
+    println("Run $j done.")
 end
