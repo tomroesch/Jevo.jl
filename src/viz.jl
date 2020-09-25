@@ -1,6 +1,6 @@
 using Plots
 
-export default_plotlyjs!,default_pyplot!
+export default_plotlyjs!,default_pyplot!,default_gr!
 
 """
     default_plotlyjs!()
@@ -44,7 +44,6 @@ function default_pyplot!()
         tickfontsize=7,
         titlefontfamily="Lucida Sans Unicode",
         titlefontsize=8,
-        dpi=250,
         linewidth=1.25,
         legendtitlefontsize=8,
         legendfontsize=8,
@@ -52,7 +51,29 @@ function default_pyplot!()
         foreground_color_legend="#E3DCD0",
         color_palette=:seaborn_colorblind,
         label=:none,
-        size=(300, 300),
-        fmt=:png
+        size=(200, 200)
+    )
+end
+
+function default_gr!()
+    gr(
+        background_color="#E3DCD0",
+        background_color_outside="white",
+        foreground_color_grid="#ffffff",
+        gridlinewidth= 0.5,
+        guidefontfamily="Lucida Sans Unicode",
+        guidefontsize=8,
+        tickfontfamily="Lucida Sans Unicode",
+        tickfontsize=7,
+        titlefontfamily="Lucida Sans Unicode",
+        titlefontsize=8,
+        linewidth=1.25,
+        legendtitlefontsize=8,
+        legendfontsize=8,
+        legend=(0.8, 0.8),
+        background_color_legend="#E3DCD0",
+        color_palette=:seaborn_colorblind,
+        label=:none,
+        size=(300, 300)
     )
 end
