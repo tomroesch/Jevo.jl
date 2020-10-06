@@ -4,7 +4,7 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
     @testset "Simple binding sites" begin
 
         pop = Jevo.binding_sites(N=4, l=10, n=4)
-        initiate!(pop, 3)
+        Jevo.initiate!(pop, 3)
         # Test population size
         @test sum(pop.freqs) == pop.N
         # Test number of species
