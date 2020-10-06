@@ -1,4 +1,4 @@
-# Jedi - Evolution simulations in Julia
+# Jevo - Evolution simulations in Julia
 
 ### Setting up the environment
 
@@ -6,4 +6,4 @@ All code in this repository is written in Julia ([version 1.5](https://github.co
 
 To add packages, open the REPL and type `]`, which opens up the package manager. Then, write `add <name>`, where `<name` is replaced with the name of the package of interest. Most
 
-[![Build Status](https://travis-ci.com/tomroesch/Jedi.jl.svg?branch=master)](https://travis-ci.com/tomroesch/Jedi.jl)
+[![Build Status](https://travis-ci.com/tomroesch/Jevo.svg?branch=master)](https://travis-ci.com/tomroesch/Jevo.jl)
