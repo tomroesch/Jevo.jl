@@ -1,4 +1,4 @@
-using Jedi, Test, BenchmarkTools, LinearAlgebra
+using Jevo, Test, BenchmarkTools, LinearAlgebra
 
 @testset "Initiating " begin
     @testset "Simple binding sites" begin
