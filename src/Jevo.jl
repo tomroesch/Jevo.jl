@@ -1,4 +1,4 @@
-module Jedi
+module Jevo
 
 include("fitness.jl")
 include("populations.jl")
