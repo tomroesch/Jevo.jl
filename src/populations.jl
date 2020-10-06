@@ -1,5 +1,3 @@
-export binding_sites,driver_trailer,driver_trailer_l,mono_pop
-
 abstract type populations end
 
 abstract type DT_population <: populations end

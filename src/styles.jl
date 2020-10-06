@@ -1,6 +1,5 @@
 using Plots
 
-export default_plotlyjs!,default_pyplot!,default_gr!
 
 """
     default_plotlyjs!()
@@ -74,6 +73,5 @@ function default_gr!()
         background_color_legend="#E3DCD0",
         color_palette=:seaborn_colorblind,
         label=:none,
-        size=(300, 300)
     )
 end

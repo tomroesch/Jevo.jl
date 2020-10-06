@@ -1,6 +1,6 @@
 using Distributions
 
-export get_energy,sample_gen!
+
 """
     get_energy(pop::binding_sites, emat::Array{T, 2}) where {T<:Real}
 
