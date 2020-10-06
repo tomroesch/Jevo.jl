@@ -1,5 +1,3 @@
-export fermi_fitness, fitness, quadratic_fitness
-
 abstract type fitness_functions end
 
 

@@ -1,4 +1,3 @@
-export initiate!,make_driver
 
 """
     function initiate!(pop::binding_sites, c::Int64; overwrite=false)
