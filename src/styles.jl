@@ -50,7 +50,6 @@ function default_pyplot!()
         foreground_color_legend="#E3DCD0",
         color_palette=:seaborn_colorblind,
         label=:none,
-        size=(200, 200)
     )
 end
 
