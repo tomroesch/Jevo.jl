@@ -8,13 +8,13 @@
 All code in this repository is written in Julia ([version 1.5](https://github.com/JuliaLang/julia/releases/tag/v1.5.0), can be installed from this link). Once Julia is installed, the standard Julia REPL can be started from the terminal, by navigating into the folder where Julia was installed, and running `path/julia/bin/julia`. On Mac, it should simply be `/Applications/Julia-1.5.app/Contents/Resources/julia/bin/julia` (we recommend setting an alias).
 
 To add this package, navigate into this folder and run: 
-```
+```julia
 julia> ] dev .
 ```
 
 This adds the package in the development mode, and lets you add and change things at will. Make sure to include testing for additions to the package to ensure functionality. To test the package, the environment has to the activated. Therefore, run Julia with this directory as working directory and use:
 
-```
+```julia
 julia> ] activate .
 
 julia> ] test
@@ -25,7 +25,7 @@ julia> ] test
 
 Included in this package are a few number of population types of genetic possible genetic sequences composed of integers as letters. Population types are initialized as subtypes of the type `populations`.
 
-```
+```julia
 julia>? Jevo.populations
   No documentation found.
 
@@ -43,7 +43,7 @@ julia>? Jevo.populations
 
 The most basic type is `binding_sites`, which consists of a population of single sequences with fixed length. To find information about the fields, simply check out the documentation.
 
-```
+```julia
 julia>?Jevo.binding_sites
   mutable struct binding_sites <: populations
 
@@ -75,7 +75,7 @@ julia>?Jevo.binding_sites
 
 By default, populations are initiated without sequences, which are initiated in a later step. All parameters are given as keyword arguments. Initial sequences and frequencies can also be given if wanted.
 
-```
+```julia
 julia> Jevo.binding_sites()
   Jevo.binding_sites(1000, 10, 4, Array{Int64,1}[], Int64[])
 
@@ -85,7 +85,7 @@ Jevo.binding_sites(100, 20, 2, Array{Int64,1}[], Int64[])
 
 If no initial sequences were given, they can be added by using the `initiate!` function, which takes a population and optionally the number of species as arguments (by default a single sequence is generated). Sequences are created randomly. If a population already has sequences, then the additional keyword argument `overwrite=true` can be used to reset the species sizes back to a uniform distribution.
 
-```
+```julia
 julia> pop = Jevo.binding_sites()
 Jevo.binding_sites(1000, 10, 4, Array{Int64,1}[], Int64[])
 
