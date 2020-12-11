@@ -1,4 +1,6 @@
+using InteractiveUtils
 
+export showtypetree
 """
     parse_metadata(file)
 
@@ -28,4 +30,46 @@ function parse_metadata(file)
     parameter_array = split.(lines, "=") |> x->Array{String, 1}.(x)
     parameter_dict = Dict(parameter_array)
     return parameter_dict
+end
+
+
+"""
+    function showtypetree(T, level=0)
+
+Show the all subtypes in a tree. Taken from  https://en.wikibooks.org/wiki/Introducing_Julia/Types .
+
+# Example
+```julia-repl
+julia> showtypetree(Real)
+Real
+	AbstractFloat
+		BigFloat
+		Float16
+		Float32
+		Float64
+	AbstractIrrational
+		Irrational
+	Integer
+		Bool
+		Signed
+			BigInt
+			Int128
+			Int16
+			Int32
+			Int64
+			Int8
+		Unsigned
+			UInt128
+			UInt16
+			UInt32
+			UInt64
+			UInt8
+	Rational
+	StatsBase.TestStat
+```
+function showtypetree(T, level=0)
+    println("\t" ^ level, T)
+    for t in subtypes(T)
+        showtypetree(t, level+1)
+    end
 end

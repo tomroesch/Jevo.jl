@@ -116,3 +116,17 @@ julia> pop.freqs
  200
 ```
 
+Other population types have more parameters, but are initialized in the same way. To see all population types that are included at the moment use the function `showtypetree`, which is copied from [wikibooks](https://en.wikibooks.org/wiki/Introducing_Julia/Types).
+
+```
+julia> showtypetree(Jevo.populations)
+Jevo.populations
+	Jevo.DT_population
+		Jevo.driver_trailer
+		Jevo.driver_trailer_l
+		Jevo.mono_pop
+	Jevo.binding_sites
+```
+
+Each of these types has its own `initiate!` function, but works the same for all types. What parameters are used for each type can be found in the documentation of each type.
+
