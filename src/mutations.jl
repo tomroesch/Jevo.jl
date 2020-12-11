@@ -17,7 +17,7 @@ function mutation!(pop::populations)
     push!(pop.freqs, 1)
     pop.freqs[mutation_sequence] -= 1
     # Choose random base to mutate
-    mutation_base = rand(1:pop.L)
+    mutation_base = rand(1:pop.l)
     # Exclude self mutations
     poss_bases = filter(x->x != pop.seqs[end][mutation_base], collect(1:pop.n))
     # Choose random new base
