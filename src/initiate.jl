@@ -30,11 +30,12 @@ function initiate!(pop::binding_sites, c::Int64=1; overwrite::Bool=false)
         N_sub = pop.N ÷ c
         rest = pop.N - N_sub * c
         for i in 1:c
-            push!(pop.seqs, rand(collect(1:pop.n), pop.L))
+            push!(pop.seqs, rand(collect(1:pop.n), pop.l))
             push!(pop.freqs, N_sub)
         end
         pop.freqs[1] += rest
     end
+    nothing
 end
 
 

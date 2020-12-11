@@ -2,17 +2,30 @@ abstract type populations end
 
 abstract type DT_population <: populations end
 
-@doc """
+"""
     mutable struct binding_sites <: populations
 
-Creates population of simple binding sites of fixed length.
+Population of simple binding sites with fixed length.
+
+...
+# Arguments
+- `N::Float64=1000`: population size.
+- `l::Int64=10`: Length of site.
+- `n::Int64=4`: Alphabet size.
+- `seqs::Array{Array{Int64, 1}, 1}=[]`: Array of sequences for each species.
+- `freqs::Array{Int64, 1}=[]` Species sizes.
+...
+
+# Examples
+```jldoctest
+julia> Jevo.binding_sites()
+Jevo.binding_sites(1000, 10, 4, Array{Int64,1}[], Int64[])
+```
 """
 mutable struct binding_sites <: populations
     "Population size"
     N::Int64
-    "Maximal length (in case of length mutations)"
-    L::Int64
-    "Inital length of specific site"
+    "Length of site"
     l::Int64
     "Alphabet size"
     n::Int64
@@ -21,23 +34,15 @@ mutable struct binding_sites <: populations
     "Subpopulation sizes"
     freqs::Array{Int64, 1}
 
-    function binding_sites(N, L, l, n, seqs, freqs)
-        if l > L
-            @warn "l>L. Choosing L=l."
-            L = l
-        end
-        new(N, L, l, n, seqs, freqs)
-    end
 end
 
-"""Initiate population with keyword arguments."""
-binding_sites(;N=10000, L=10, l=L, n=4, seqs=Array{Int64, 1}[], freqs=Int64[]) = binding_sites(N, L, l, n, seqs, freqs)
+binding_sites(;N=1000, l=10, n=4, seqs=Array{Int64, 1}[], freqs=Int64[]) = binding_sites(N, l, n, seqs, freqs)
 
 
 """
     mutable struct driver_trailer <: DT_population
 
-Creates population of simple binding sites of fixed length with a given driver sequence.
+Population of simple binding sites of fixed length with a given driver sequence.
 """
 mutable struct driver_trailer <: DT_population
     "Population size"
@@ -127,3 +132,5 @@ mutable struct mono_pop <: DT_population
 end
 
 mono_pop(;N=1000, l=15, n=4, seqs=Int64[], m=4, driver=Int64[]) = mono_pop(N, l, n, seqs, m, driver)
+
+

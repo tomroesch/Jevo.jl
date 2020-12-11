@@ -259,7 +259,8 @@ end
 """
     kimura_prob(s, N)
 
-Probability of fixation of a mutation in a monomorphic population.
+Probability of fixation of a mutation with selection coefficient
+`s` in a monomorphic population of size `N`.
 """
 function kimura_prob(s, N)
     if abs(s) <= 10^-8

@@ -10,9 +10,7 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         # Test number of species
         @test length(pop.seqs) == 3
         # Test sequence length of species
-        @test length.(pop.seqs) == (ones(Int64, 3) .* pop.L)
-        # Test warning message
-        @test_logs (:warn, "l>L. Choosing L=l.") Jevo.binding_sites(N=4, l=10, L=2, n=4)
+        @test length.(pop.seqs) == (ones(Int64, 3) .* pop.l)
         @test_nowarn Jevo.initiate!(pop, overwrite=true)
 
     end
@@ -138,14 +136,14 @@ end
 
 @testset "Mutations" begin
     @testset "Find existing sequences" begin
-        pop = Jevo.binding_sites(N=8, L=1, n=4, seqs=[[1], [2], [3], [4]], freqs=[2, 2, 2, 2])
+        pop = Jevo.binding_sites(N=8, l=1, n=4, seqs=[[1], [2], [3], [4]], freqs=[2, 2, 2, 2])
         Jevo.mutation!(pop)
         # Test that mutation to existing species does not add new species
         @test length(pop.seqs) == 4
         @test length(pop.freqs) == 4
     end
     @testset "Add new species" begin
-        pop = Jevo.binding_sites(N=2, L=1, n=2)
+        pop = Jevo.binding_sites(N=2, l=1, n=2)
         Jevo.initiate!(pop, 1)
         Jevo.mutation!(pop)
         # Test that new species is created
