@@ -26,8 +26,6 @@ end
 fermi_fitness(;l=10, beta=1, f0=1, fl=0, E_Star=Est) = fermi_fitness(l, beta, f0, fl, E_Star)
 
 
-
-
 """
     function fitness(E::Float64, p::fermi_fitness)
 

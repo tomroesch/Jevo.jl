@@ -2,7 +2,7 @@ abstract type populations end
 
 abstract type DT_population <: populations end
 
-"""
+@doc """
     mutable struct binding_sites <: populations
 
 Creates population of simple binding sites of fixed length.
@@ -30,6 +30,7 @@ mutable struct binding_sites <: populations
     end
 end
 
+"""Initiate population with keyword arguments."""
 binding_sites(;N=10000, L=10, l=L, n=4, seqs=Array{Int64, 1}[], freqs=Int64[]) = binding_sites(N, L, l, n, seqs, freqs)
 
 
