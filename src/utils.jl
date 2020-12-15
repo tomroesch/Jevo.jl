@@ -67,6 +67,7 @@ Real
 	Rational
 	StatsBase.TestStat
 ```
+"""
 function showtypetree(T, level=0)
     println("\t" ^ level, T)
     for t in subtypes(T)
