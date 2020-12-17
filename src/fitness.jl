@@ -17,13 +17,14 @@ fermi_fitness(;l=l, beta=beta, f0=f0, fl=fl) = fermi_fitness(l, beta, f0, fl, Es
 mutable struct fermi_fitness <: fitness_functions
     l::Int64
     beta::Float64
+    epsilon::Float64
     f0::Float64
     fl::Float64
     E_Star::Function
 end
 
 # Setting some defaults
-fermi_fitness(;l=10, beta=1, f0=1, fl=0, E_Star=Est) = fermi_fitness(l, beta, f0, fl, E_Star)
+fermi_fitness(;l=10, beta=1, epsilon=2, f0=1, fl=0, E_Star=Est) = fermi_fitness(l, beta, epsilon, f0, fl, E_Star)
 
 
 """
@@ -32,7 +33,7 @@ fermi_fitness(;l=10, beta=1, f0=1, fl=0, E_Star=Est) = fermi_fitness(l, beta, f0
 Evaluate fermi fitness function.
 """
 function _fitness(E::Real, p::fermi_fitness)
-    fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(p.l))))) - p.fl * p.l)
+    fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(p.l) * p.epsilon)))) - p.fl * p.l)
     return fitness
 end
 
@@ -43,7 +44,7 @@ end
 Evaluate fermi fitness function.
 """
 function _dE_fitness(E::Real, p::fermi_fitness)
-    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(p.l))))^2 * p.beta * exp(p.beta * (E - p.E_Star(p.l)))
+    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(p.l))))^2 * p.beta * exp(p.beta * (E - p.E_Star(p.l) * p.epsilon))
     return dfitness
 end
 
@@ -54,7 +55,7 @@ end
 Evaluate fermi fitness function.
 """
 function _fitness(E::Real, l::Int64, p::fermi_fitness)
-    fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(l))))) - p.fl * l)
+    fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(l) * p.epsilon)))) - p.fl * l)
     return fitness
 end
 
@@ -65,7 +66,7 @@ end
 Evaluate fermi fitness function.
 """
 function _dE_fitness(E::Real, l::Int64, p::fermi_fitness)
-    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(l))))^2 * p.beta * exp(p.beta * (E - p.E_Star(l)))
+    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(l))))^2 * p.beta * exp(p.beta * (E - p.E_Star(l) * p.epsilon))
     return dfitness
 end
 
@@ -76,7 +77,7 @@ end
 Threshold of the fermi landscape.
 """
 function Est(l)
-    return 2*(3l/4 - 5)
+    return (3l/4 - 5)
 end
 
 
