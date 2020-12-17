@@ -21,6 +21,27 @@ function initiate!(pop::binding_sites, c::Int64=1)
 end
 
 
+"""
+    function initiate!(pop::binding_sites, c::Int64; overwrite=false)
+
+Iniate a population of random sequences.
+
+# Arguments
+- `pop::binding_sites`: population that is to be filled.
+- `c::Int64=1`: number of species to create.
+"""
+function initiate!(pop::binding_sites, emat::Array{Float64, 2})
+    
+    if size(emat) != (pop.n, pop.l)
+        throw(DimensionMismatch("Energy matrix needs to have dimensions (n, l)"))
+    end
+    push!(pop.seqs, argmin.(emat[:, i] for i in 1:pop.l))
+    push!(pop.freqs, pop.N)
+
+    nothing
+end
+
+
 
 """
     function initiate!(

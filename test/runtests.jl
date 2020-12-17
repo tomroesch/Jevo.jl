@@ -11,7 +11,18 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         @test length(pop.seqs) == 3
         # Test sequence length of species
         @test length.(pop.seqs) == (ones(Int64, 3) .* pop.l)
-        #@test_nowarn Jevo.initiate!(pop)
+
+        emat = ones(4,4)
+        pop = Jevo.binding_sites(N=4, l=10, n=4)
+        @test_throws DimensionMismatch Jevo.initiate!(pop, emat)
+
+        emat = ones(4, 10)
+        emat[1, :] .-= 1
+        pop = Jevo.binding_sites(N=4, l=10, n=4)
+        Jevo.initiate!(pop, emat)
+        @test pop.seqs[1] == ones(Int, 10)
+
+
 
     end
 
@@ -33,6 +44,10 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         end
 
         @testset "Optimal Sequence" begin
+            pop = Jevo.driver_trailer(N=4, l=10, n=4, m=4)
+            emat = ones(4, 3)
+            @test_throws DimensionMismatch Jevo.initiate!(pop, emat)
+
 
             pop = Jevo.driver_trailer(N=4, l=10, n=4, m=4)
             emat = ones(4, 4)
@@ -90,6 +105,10 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         end
 
         @testset "Optimal Sequence" begin
+            pop = Jevo.driver_trailer(N=4, l=10, n=4, m=4)
+            emat = ones(4, 3)
+            @test_throws DimensionMismatch Jevo.initiate!(pop, emat)
+
             emat = ones(4, 4)
             emat[1, :] .-= 1
             pop = Jevo.driver_trailer_l(N=4, l_0=10, n=4, m=4, L=20)
@@ -136,6 +155,10 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         end
 
         @testset "Initiate Optimal" begin
+            pop = Jevo.driver_trailer(N=4, l=10, n=4, m=4)
+            emat = ones(4, 3)
+            @test_throws DimensionMismatch Jevo.initiate!(pop, emat)
+
             emat = ones(4, 4)
             emat[1, :] .-= 1
             pop = Jevo.mono_pop(N=10, l=10, n=4, m=4)
