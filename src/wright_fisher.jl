@@ -4,7 +4,8 @@ using Distributions
 """
     get_energy(pop::binding_sites, emat::Array{T, 2}) where {T<:Real}
 
-Compute binding energies in simple binding energy model.
+Compute binding energies in simple binding energy model. Energy matrix needs to have
+dimensions (n, site_length).
 """
 function get_energy(pop::binding_sites, emat::Array{T, 2}) where {T<:Real}
     c = length(pop.seqs)

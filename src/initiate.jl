@@ -7,34 +7,16 @@ Iniate a population of random sequences.
 # Arguments
 - `pop::binding_sites`: population that is to be filled.
 - `c::Int64=1`: number of species to create.
-- `overwrite::Bool=false`: If `true`, resets a given population to equal subspecies size.
 """
-function initiate!(pop::binding_sites, c::Int64=1; overwrite::Bool=false)
-
-    if ~isempty(pop.seqs)
-        # Reiniate existing sequences
-        if overwrite
-            c = length(pop.seqs)
-            pop.freqs .= 0
-            N_sub = pop.N ÷ c
-            rest = pop.N - N_sub * c
-            for i in 1:c
-                pop.freqs[i] =  N_sub
-            end
-            pop.freqs[1] += rest
-        else
-            return
-        end
-    else
-        # Create new population
-        N_sub = pop.N ÷ c
-        rest = pop.N - N_sub * c
-        for i in 1:c
-            push!(pop.seqs, rand(collect(1:pop.n), pop.l))
-            push!(pop.freqs, N_sub)
-        end
-        pop.freqs[1] += rest
+function initiate!(pop::binding_sites, c::Int64=1)
+    # Create new population
+    N_sub = pop.N ÷ c
+    rest = pop.N - N_sub * c
+    for i in 1:c
+        push!(pop.seqs, rand(collect(1:pop.n), pop.l))
+        push!(pop.freqs, N_sub)
     end
+    pop.freqs[1] += rest
     nothing
 end
 
@@ -44,9 +26,8 @@ end
     function initiate!(
         pop::driver_trailer,
         c::Int64;
-        driver::Array{Int64, 1}=Int64[],
-        overwrite::Bool=false,
-        opt::Bool=false)
+        driver::Array{Int64, 1}=Int64[]
+        )
 
 Initiates population.
 
@@ -59,57 +40,70 @@ will be either filled with random letters or truncated to the right length.
 - `pop::driver_trailer`: population that is to be filled.
 - `c::Int64=1`: number of species to create.
 - `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
-- `overwrite::Bool=false`: If `true`, resets a given population to equal subspecies size.
-- `opt::Bool="false"`: If `true`, copies driver to seq. If `false`, creates random sequence.
 """
 function initiate!(
     pop::driver_trailer,
     c::Int64=1;
-    driver::Array{Int64, 1}=Int64[],
-    overwrite::Bool=false,
-    opt::Bool=false
+    driver::Array{Int64, 1}=Int64[]
     )
 
-    if ~isempty(pop.seqs)
-        # Reiniate existing sequences
-        if overwrite
-            c = length(pop.seqs)
-            pop.freqs .= 0
-            N_sub = pop.N ÷ c
-            rest = pop.N - N_sub * c
-            for i in 1:c
-                pop.freqs[i] =  N_sub
-            end
-            pop.freqs[1] += rest
-        else
-            return
-        end
-    else
-        pop.driver[:] = make_driver(driver, pop.m, pop.L)
-        # Create new population
-        if ~opt
-            N_sub = pop.N ÷ c
-            rest = pop.N - N_sub * c
-            for i in 1:c
-                push!(pop.seqs, rand(collect(1:pop.n), pop.L))
-                push!(pop.freqs, N_sub)
-            end
-            pop.freqs[1] += rest
-        else
-            push!(pop.freqs, pop.N)
-            push!(pop.seqs, pop.driver)
-        end
+    pop.driver[:] = make_driver(driver, pop.m, pop.L)
+    # Create new population
+    N_sub = pop.N ÷ c
+    rest = pop.N - N_sub * c
+    for i in 1:c
+        push!(pop.seqs, rand(collect(1:pop.n), pop.L))
+        push!(pop.freqs, N_sub)
     end
+    pop.freqs[1] += rest
+    nothing
 end
+
+
+"""
+    function initiate!(
+        pop::driver_trailer,
+        emat::Array{Float64, 2};
+        driver::Array{Int64, 1}=Int64[]
+        )
+
+Initiates an optimal population.
+
+
+Creates a population of type `driver_trailer`, where a driver sequence can be given.
+Given driver sequence can be shorter or longer than initial binding site length. Optimal sequence
+will chosen as the one which minimizes energy.
+
+# Arguments
+- `pop::driver_trailer`: population that is to be filled.
+- `emat::Array{Float64,2}` : Energy matrix to choose optimal sequence
+- `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
+"""
+function initiate!(
+    pop::driver_trailer,
+    emat::Array{Float64, 2};
+    driver::Array{Int64, 1}=Int64[]
+    )
+
+    if size(emat) != (pop.n, pop.m)
+        throw(DimensionMismatch("Energy matrix needs to have dimensions (n, m)"))
+    end
+
+    pop.driver[:] = make_driver(driver, pop.m, pop.L)
+    push!(pop.freqs, pop.N)
+
+    push!(pop.seqs, argmin.([emat[:, j] for j in pop.driver]))
+
+end
+
 
 
 """
     function initiate!(
         pop::driver_trailer_l,
         c::Int64;
-        driver::Array{Int64, 1}=Int64[],
-        overwrite=false,
-        opt::Bool=false)
+        driver::Array{Int64, 1}=Int64[]
+        )
 
 Iniate a population of c species of and a driver sequence, which can be given.
 
@@ -122,62 +116,64 @@ will be either filled with random letters or truncated to the right length.
 - `pop::driver_trailer`: population that is to be filled.
 - `c::Int64=1`: number of species to create.
 - `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
-- `overwrite::Bool=false`: If `true`, resets a given population to equal subspecies size.
-- `opt::Bool="false"`: If `true`, copies driver to seq. If `false`, creates `c` random sequences.
 """
 function initiate!(
     pop::driver_trailer_l,
     c::Int64=1;
     driver::Array{Int64, 1}=Int64[],
-    overwrite::Bool=false,
-    opt::Bool=false
     )
 
-    if ~isempty(pop.seqs)
-        # Reiniate existing sequences
-        if overwrite
-            c = size(pops.seqs)
-            pop.freqs .= 0
-            N_sub = pop.N ÷ c
-            rest = pop.N - N_sub * c
-            for i in 1:c
-                pop.freqs[i] =  N_sub
-            end
-            pop.freqs[1] += rest
-            pop.l = ones(Int64, c) * pop.l_0
-        else
-            return
-        end
-    else
-        pop.driver[:] = make_driver(driver, pop.m, pop.L)
-
-        if ~opt
-            # Create new population
-            N_sub = pop.N ÷ c
-            rest = pop.N - N_sub * c
-            for i in 1:c
-                push!(pop.seqs, rand(collect(1:pop.n), pop.L))
-                push!(pop.freqs, N_sub)
-            end
-            pop.freqs[1] += rest
-
-            pop.l = ones(Int64, c) * pop.l_0
-        else
-            push!(pop.seqs, pop.driver)
-            push!(pop.freqs, pop.N)
-            push!(pop.l, pop.l_0)
-        end
-
+    pop.driver[:] = make_driver(driver, pop.m, pop.L)
+    N_sub = pop.N ÷ c
+    rest = pop.N - N_sub * c
+    for i in 1:c
+        push!(pop.seqs, rand(collect(1:pop.n), pop.L))
+        push!(pop.freqs, N_sub)
     end
+    pop.freqs[1] += rest
+
+    pop.l = ones(Int64, c) * pop.l_0
 end
 
+
+"""
+    function initiate!(
+        pop::driver_trailer_l,
+        emat::Array{Float64, 2};
+        driver::Array{Int64, 1}=Int64[]
+        )
+
+Iniate a population of c species of and a driver sequence, which can be given.
+
+Creates a population of type `driver_trailerPl`, where a driver sequence can be given.
+Given driver sequence can be shorter or longer than initial binding site length. Sequence
+will be either filled with random letters or truncated to the right length.
+
+
+# Arguments
+- `pop::driver_trailer`: population that is to be filled.
+- `emat::Array{Float64,2}` : Energy matrix to choose optimal sequence
+- `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
+"""
+function initiate!(
+    pop::driver_trailer_l,
+    emat::Array{Float64,2};
+    driver::Array{Int64, 1}=Int64[],
+    )
+
+    pop.driver[:] = make_driver(driver, pop.m, pop.L)
+    push!(pop.freqs, pop.N)
+    push!(pop.seqs, argmin.([emat[:, j] for j in pop.driver]))
+        
+    pop.l = Int64[pop.l_0]
+end
 
 
 """
     function initiate!(
         pop::mono_pop;
-        driver::Array{Int64, 1}=Int64[],
-        opt::Bool=false)
+        driver::Array{Int64, 1}=Int64[]
+        )
 
 Iniate a monomorphic population and a driver sequence, which can be given.
 
@@ -189,21 +185,47 @@ will be either filled with random letters or truncated to the right length.
 # Arguments
 - `pop::driver_trailer`: population that is to be filled.
 - `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
-- `opt::Bool=false`: If `false`, creates random sequence. If `true`, copies driver sequence.
 """
 function initiate!(
     pop::mono_pop;
     driver::Array{Int64, 1}=Int64[],
-    opt::Bool=false
     )
-
     pop.driver = make_driver(driver, pop.m, pop.l)
+    pop.seqs =  rand(collect(1:pop.n), pop.l)
+    nothing
+end
 
-    if ~opt
-        pop.seqs =  rand(collect(1:pop.n), pop.l)
-    else
-        pop.seqs = pop.driver
+
+"""
+    function initiate!(
+        pop::mono_pop
+        emat::Array{Float64, 2};
+        driver::Array{Int64, 1}=Int64[]
+        )
+
+Iniate a monomorphic population and a driver sequence, which can be given.
+
+Creates a population of type `mono_pop`, where a driver sequence can be given.
+Given driver sequence can be shorter or longer than initial binding site length. Sequence
+will be either filled with random letters or truncated to the right length.
+
+
+# Arguments
+- `pop::driver_trailer`: population that is to be filled.
+- `emat::Array{Float64,2}` : Energy matrix to choose optimal sequence
+- `driver::Array{Int64, 1}=Int64[]`: Optional initial driver sequence.
+"""
+function initiate!(
+    pop::mono_pop,
+    emat::Array{Float64,2};
+    driver::Array{Int64, 1}=Int64[],
+    )
+    if size(emat) != (pop.n, pop.m)
+        throw(DimensionMismatch("Energy matrix needs to have dimensions (n, m)"))
     end
+    pop.driver = make_driver(driver, pop.m, pop.l)
+    pop.seqs =  argmin.([emat[:, j] for j in pop.driver])
+    nothing
 end
 
 

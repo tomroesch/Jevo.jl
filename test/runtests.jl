@@ -11,7 +11,7 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         @test length(pop.seqs) == 3
         # Test sequence length of species
         @test length.(pop.seqs) == (ones(Int64, 3) .* pop.l)
-        @test_nowarn Jevo.initiate!(pop, overwrite=true)
+        #@test_nowarn Jevo.initiate!(pop)
 
     end
 
@@ -28,15 +28,22 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
             @test length.(pop1.seqs) == (ones(Int64, 3) .* pop1.L)
             # Test length of driver
             @test length(pop1.driver) == pop1.L
-            @test_nowarn Jevo.initiate!(pop1, overwrite=true)
+            #@test_nowarn Jevo.initiate!(pop1, overwrite=true)
 
         end
 
         @testset "Optimal Sequence" begin
 
             pop = Jevo.driver_trailer(N=4, l=10, n=4, m=4)
-            Jevo.initiate!(pop, 3, opt=true)
+            emat = ones(4, 4)
+            emat[1, :] .-= 1
+            Jevo.initiate!(pop, emat)
+            @test pop.seqs[1] == ones(Int, 10)
             @test length(pop.seqs) == 1
+
+            emat = ones(4, 4) - Matrix{Float64}(I, 4, 4)
+            pop = Jevo.driver_trailer_l(N=4, l_0=10, n=4, m=4, L=20)
+            Jevo.initiate!(pop, emat)
             @test pop.seqs[1] == pop.driver
             @test length(pop.freqs) == 1
             @test pop.freqs[1] == 4
@@ -83,10 +90,16 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         end
 
         @testset "Optimal Sequence" begin
-
+            emat = ones(4, 4)
+            emat[1, :] .-= 1
             pop = Jevo.driver_trailer_l(N=4, l_0=10, n=4, m=4, L=20)
-            Jevo.initiate!(pop, 3, opt=true)
+            Jevo.initiate!(pop, emat)
+            @test pop.seqs[1] == ones(Int, 20)
             @test length(pop.seqs) == 1
+            
+            emat = ones(4, 4) - Matrix{Float64}(I, 4, 4)
+            pop = Jevo.driver_trailer_l(N=4, l_0=10, n=4, m=4, L=20)
+            Jevo.initiate!(pop, emat)
             @test pop.seqs[1] == pop.driver
             @test length(pop.freqs) == 1
             @test pop.freqs[1] == 4
@@ -123,8 +136,18 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         end
 
         @testset "Initiate Optimal" begin
+            emat = ones(4, 4)
+            emat[1, :] .-= 1
             pop = Jevo.mono_pop(N=10, l=10, n=4, m=4)
-            Jevo.initiate!(pop, opt=true)
+            Jevo.initiate!(pop, emat)
+            @test length(pop.seqs) == 10
+            @test length(pop.driver) == 10
+            @test pop.seqs == ones(Int64, 10)
+
+            
+            emat = ones(4, 4) - Matrix{Float64}(I, 4, 4)
+            pop = Jevo.mono_pop(N=10, l=10, n=4, m=4)
+            Jevo.initiate!(pop, emat)
             @test length(pop.seqs) == 10
             @test length(pop.driver) == 10
             @test pop.seqs == pop.driver
@@ -205,7 +228,7 @@ end
 @testset "Substitutions" begin
     pop = Jevo.driver_trailer(N=4, l=10, n=4, m=4)
     Jevo.initiate!(pop, 2)
-    emat = Matrix{Float64}(I, 4, 4)
+    emat = ones(4, 4) .- Matrix{Float64}(I, 4, 4)
     f = Jevo.fermi_fitness(l=10, beta=1, f0=1, fl=0)
     # Test error for too many species
     @test_throws ArgumentError Jevo.bp_substitution!(pop, emat, f)
