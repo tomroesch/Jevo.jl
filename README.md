@@ -83,7 +83,7 @@ julia> Jevo.binding_sites(N=100, n=2, l=20)
 Jevo.binding_sites(100, 20, 2, Array{Int64,1}[], Int64[])
 ```
 
-If no initial sequences were given, they can be added by using the `initiate!` function, which takes a population and optionally the number of species as arguments (by default a single sequence is generated). Sequences are created randomly. If a population already has sequences, then the additional keyword argument `overwrite=true` can be used to reset the species sizes back to a uniform distribution.
+If no initial sequences were given, they can be added by using the `initiate!` function, which takes a population and optionally the number of species as arguments (by default a single sequence is generated). Sequences are created randomly.
 
 ```julia
 julia> pop = Jevo.binding_sites()
@@ -129,4 +129,6 @@ Jevo.populations
 ```
 
 Each of these types has its own `initiate!` function, but works the same for all types. What parameters are used for each type can be found in the documentation of each type.
+
+One can also generate a sequence which is optimally adapted, meaning it has minimal binding energy. Therefore, the second argument when initializing the sequence is an energy matrix.
 
