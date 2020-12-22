@@ -32,7 +32,7 @@ fermi_fitness(;l=10, beta=1, epsilon=2, f0=1, fl=0, E_Star=Est) = fermi_fitness(
 
 Evaluate fermi fitness function.
 """
-function _fitness(E::Real, p::fermi_fitness)
+function _fitness(E::Real, p::fermi_fitness)::Float64
     fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(p.l, p.epsilon))))) - p.fl * p.l)
     return fitness
 end
@@ -54,7 +54,7 @@ end
 
 Evaluate fermi fitness function.
 """
-function _fitness(E::Real, l::Int64, p::fermi_fitness)
+function _fitness(E::Real, l::Int64, p::fermi_fitness)::Float64
     fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(l, p.epsilon))))) - p.fl * l)
     return fitness
 end
@@ -76,7 +76,7 @@ end
 
 Threshold of the fermi landscape.
 """
-function Est(l, epsilon)
+function Est(l::Int, epsilon::Real)::Real
     return (3l/4 - 5) * epsilon
 end
 
