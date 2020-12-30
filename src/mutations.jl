@@ -262,7 +262,7 @@ end
 Probability of fixation of a mutation with selection coefficient
 `s` in a monomorphic population of size `N`.
 """
-function kimura_prob(s, N)
+function kimura_prob(s::Real, N::Int)
     if abs(s) <= 10^-8
         return 1 / N
     else
