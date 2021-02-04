@@ -9,7 +9,7 @@ dimensions (n, site_length).
 """
 function get_energy(pop::binding_sites, emat::Array{T, 2}) where {T<:Real}
     c = length(pop.seqs)
-    energy = zeros(Float64, c)
+    energy = zeros(T, c)
     for j in 1:c
         for i in eachindex(1:pop.l)
             energy[j] += emat[pop.seqs[j][i], i]
@@ -58,9 +58,9 @@ end
 
 Compute binding energies in monomorphic population..
 """
-function get_energy(pop::mono_pop, emat::Array{T, 2}) where {T<:Real}
+function get_energy(pop::mono_pop, emat::Array{T, 2})::T where {T<:Real}
 
-    energy = 0
+    energy::T = 0
     for i in eachindex(pop.seqs)
         energy += emat[pop.seqs[i], pop.driver[i]]
     end
