@@ -3,9 +3,9 @@ abstract type populations end
 abstract type DT_population <: populations end
 
 """
-    mutable struct binding_sites <: populations
+    mutable struct simple_sites <: populations
 
-Population of simple binding sites with fixed length.
+Population of simple sites with fixed length.
 
 ...
 # Arguments
@@ -18,11 +18,11 @@ Population of simple binding sites with fixed length.
 
 # Examples
 ```jldoctest
-julia> Jevo.binding_sites()
-Jevo.binding_sites(1000, 10, 4, Array{Int64,1}[], Int64[])
+julia> Jevo.simple_sites()
+Jevo.simple_sites(1000, 10, 4, Array{Int64,1}[], Int64[])
 ```
 """
-mutable struct binding_sites <: populations
+mutable struct simple_sites <: populations
     "Population size"
     N::Int64
     "Length of site"
@@ -36,7 +36,7 @@ mutable struct binding_sites <: populations
 
 end
 
-binding_sites(;N=1000, l=10, n=4, seqs=Array{Int64, 1}[], freqs=Int64[]) = binding_sites(N, l, n, seqs, freqs)
+simple_sites(;N=1000, l=10, n=4, seqs=Array{Int64, 1}[], freqs=Int64[]) = simple_sites(N, l, n, seqs, freqs)
 
 
 """

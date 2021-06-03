@@ -1,9 +1,9 @@
 using Jevo, Test, BenchmarkTools, LinearAlgebra
 
 @testset "Initiating " begin
-    @testset "Simple binding sites" begin
+    @testset "Simple sites" begin
 
-        pop = Jevo.binding_sites(N=4, l=10, n=4)
+        pop = Jevo.simple_sites(N=4, l=10, n=4)
         Jevo.initiate!(pop, 3)
         # Test population size
         @test sum(pop.freqs) == pop.N
@@ -13,12 +13,12 @@ using Jevo, Test, BenchmarkTools, LinearAlgebra
         @test length.(pop.seqs) == (ones(Int64, 3) .* pop.l)
 
         emat = ones(4,4)
-        pop = Jevo.binding_sites(N=4, l=10, n=4)
+        pop = Jevo.simple_sites(N=4, l=10, n=4)
         @test_throws DimensionMismatch Jevo.initiate!(pop, emat)
 
         emat = ones(4, 10)
         emat[1, :] .-= 1
-        pop = Jevo.binding_sites(N=4, l=10, n=4)
+        pop = Jevo.simple_sites(N=4, l=10, n=4)
         Jevo.initiate!(pop, emat)
         @test pop.seqs[1] == ones(Int, 10)
 
@@ -182,20 +182,22 @@ end
 
 @testset "Mutations" begin
     @testset "Find existing sequences" begin
-        pop = Jevo.binding_sites(N=8, l=1, n=4, seqs=[[1], [2], [3], [4]], freqs=[2, 2, 2, 2])
+        pop = Jevo.simple_sites(N=8, l=1, n=4, seqs=[[1], [2], [3], [4]], freqs=[2, 2, 2, 2])
         Jevo.mutation!(pop)
         # Test that mutation to existing species does not add new species
         @test length(pop.seqs) == 4
         @test length(pop.freqs) == 4
     end
+
     @testset "Add new species" begin
-        pop = Jevo.binding_sites(N=2, l=1, n=2)
+        pop = Jevo.simple_sites(N=2, l=1, n=2)
         Jevo.initiate!(pop, 1)
         Jevo.mutation!(pop)
         # Test that new species is created
         @test length(pop.seqs) == 2
         @test length(pop.freqs) == 2
     end
+
     @testset "Driver mutation" begin
         pop = Jevo.driver_trailer(N=4, L=10, n=4, m=12)
         Jevo.initiate!(pop, 1, driver=collect(1:12))
@@ -212,6 +214,7 @@ end
         @test tmp_driver != pop2.driver
         @test sum(tmp_driver .!= pop2.driver) == 1
     end
+
     @testset "Length mutation" begin
         pop = Jevo.driver_trailer_l(N=4, L=10, n=4, m=12)
         Jevo.initiate!(pop, 1, driver=collect(1:12))
@@ -269,5 +272,15 @@ end
 
     @testset "Monomorphic Population" begin
 
+    end
+end
+
+
+@testset "Misc" begin
+    @testset "Constant Selection Coefficient" begin
+    f = Jevo.const_fitness(s=1)
+    @test Jevo.fitness(f) == 1  
+    @test Jevo.fitness(1, f) == 1  
+    @test Jevo.fitness(1, 1, f) == 1  
     end
 end

@@ -265,6 +265,8 @@ Probability of fixation of a mutation with selection coefficient
 function kimura_prob(s::Real, N::Int)
     if abs(s) <= 10^-8
         return 1 / N
+    elseif s < -10^3
+        return 0
     else
         return (1 - exp(-2s)) / (1 - exp(-2N * s))
     end

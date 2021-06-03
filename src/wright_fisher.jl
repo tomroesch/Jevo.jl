@@ -7,7 +7,7 @@ using Distributions
 Compute binding energies in simple binding energy model. Energy matrix needs to have
 dimensions (n, site_length).
 """
-function get_energy(pop::binding_sites, emat::Array{T, 2}) where {T<:Real}
+function get_energy(pop::simple_sites, emat::Array{T, 2}) where {T<:Real}
     c = length(pop.seqs)
     energy = zeros(T, c)
     for j in 1:c
@@ -78,7 +78,7 @@ end
 
 
 """
-    function sample_gen!(pop::binding_sites, fit::fitness_functions, emat::Array{T, 2}; remove=true) where {T<:Real}
+    function sample_gen!(pop::populations, fit::fitness_functions, emat::Array{T, 2}; remove=true) where {T<:Real}
 
 Sample a new generation and remove extinct species.
 """

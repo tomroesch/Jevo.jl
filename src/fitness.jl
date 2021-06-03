@@ -247,6 +247,8 @@ mutable struct num_fermi <: Jevo.fitness_functions
     fl::Real
 end
 
+num_fermi(;n=4, l_0=10, gap=7, f0=400, fl=10) = num_fermi(n, l_0, gap, f0, fl)
+
 # Neutral Expectation
 γ_0(n) = (n-1)/n
 
@@ -266,3 +268,24 @@ F_c(l, l_0, fl) = - fl * l / l_0
 F(γ, l, n, l_0, gap, f0, fl) = F_b(γ, l, n, l_0, gap, f0) + F_c(l, l_0, fl)
 
 Jevo._fitness(γ::Real, l, p::num_fermi)::Float64 = F(γ/(l * p.gap/p.l_0), l, p.n, p.l_0, p.gap, p.f0, p.fl) 
+
+
+mutable struct const_fitness <: Jevo.fitness_functions
+    s::Real
+end
+
+const_fitness(;s=1) = const_fitness(s)
+
+function _fitness(p::const_fitness)::Real
+    return p.s
+end
+
+function _fitness(E::Real, p::const_fitness)::Real
+    return p.s
+end
+
+function _fitness(E::Real, l::Int64, p::const_fitness)::Real
+    return p.s
+end
+
+fitness(p::const_fitness) = _fitness(p::const_fitness)
