@@ -12,11 +12,12 @@ mutable struct exponential_fitness <: fitness_functions
     epsilon::Float64
     f0::Float64
     fl::Float64
+    l0::Int64
     E_Star::Function
 end
 
 # Setting some defaults
-exponential_fitness(;l=10, beta=1, epsilon=2, f0=1, fl=0, E_Star=Est) = exponential_fitness(l, beta, epsilon, f0, fl, E_Star)
+exponential_fitness(;l=10, beta=1, epsilon=2, f0=1, fl=0, l0=5, E_Star=Est) = exponential_fitness(l, beta, epsilon, f0, fl, l0, E_Star)
 
 
 """
@@ -25,7 +26,7 @@ exponential_fitness(;l=10, beta=1, epsilon=2, f0=1, fl=0, E_Star=Est) = exponent
 Evaluate fermi fitness function.
 """
 function _fitness(E::Real, p::exponential_fitness)::Float64
-    fitness = p.f0 * (1 - exp(p.beta * (E - p.E_Star(p.l, p.epsilon)))) - p.fl * p.l
+    fitness = p.f0 * (1 - exp(p.beta * (E - p.E_Star(p.l, p.epsilon, p.l0)))) - p.fl * p.l
     return fitness
 end
 
@@ -36,7 +37,7 @@ end
 Evaluate fermi fitness function.
 """
 function _fitness(E::Real, l::Int64, p::exponential_fitness)::Float64
-    fitness = p.f0 * (1 - exp(p.beta * (E - p.E_Star(l, p.epsilon)))) - p.fl * l
+    fitness = p.f0 * (1 - exp(p.beta * (E - p.E_Star(l, p.epsilon, p.l0)))) - p.fl * l
     return fitness
 end
 
@@ -61,11 +62,12 @@ mutable struct fermi_fitness <: fitness_functions
     epsilon::Float64
     f0::Float64
     fl::Float64
+    l0::Int64
     E_Star::Function
 end
 
 # Setting some defaults
-fermi_fitness(;l=10, beta=1, epsilon=2, f0=1, fl=0, E_Star=Est) = fermi_fitness(l, beta, epsilon, f0, fl, E_Star)
+fermi_fitness(;l=10, beta=1, epsilon=2, f0=1, fl=0, l0=10, E_Star=Est) = fermi_fitness(l, beta, epsilon, f0, fl, l0, E_Star)
 
 
 """
@@ -74,7 +76,7 @@ fermi_fitness(;l=10, beta=1, epsilon=2, f0=1, fl=0, E_Star=Est) = fermi_fitness(
 Evaluate fermi fitness function.
 """
 function _fitness(E::Real, p::fermi_fitness)::Float64
-    fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(p.l, p.epsilon))))) - p.fl * p.l)
+    fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(p.l, p.epsilon, p.l0))))) - p.fl * p.l)
     return fitness
 end
 
@@ -85,7 +87,7 @@ end
 Evaluate fermi fitness function.
 """
 function _dE_fitness(E::Real, p::fermi_fitness)
-    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(p.l, p.epsilon))))^2 * p.beta * exp(p.beta * (E - p.E_Star(p.l, p.epsilon)))
+    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(p.l, p.epsilon, p.l0))))^2 * p.beta * exp(p.beta * (E - p.E_Star(p.l, p.epsilon, p.l0)))
     return dfitness
 end
 
@@ -96,7 +98,7 @@ end
 Evaluate fermi fitness function.
 """
 function _fitness(E::Real, l::Int64, p::fermi_fitness)::Float64
-    fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(l, p.epsilon))))) - p.fl * l)
+    fitness = (p.f0 * (1/(1 + exp(p.beta * (E - p.E_Star(l, p.epsilon, p.l0))))) - p.fl * l)
     return fitness
 end
 
@@ -107,7 +109,7 @@ end
 Evaluate fermi fitness function.
 """
 function _dE_fitness(E::Real, l::Int64, p::fermi_fitness)
-    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(l, p.epsilon))))^2 * p.beta * exp(p.beta * (E - p.E_Star(l, p.epsilon)))
+    dfitness = -p.f0 * 1/(1 + exp(p.beta * (E - p.E_Star(l, p.epsilon, p.l0))))^2 * p.beta * exp(p.beta * (E - p.E_Star(l, p.epsilon, p.l0)))
     return dfitness
 end
 
@@ -117,20 +119,22 @@ end
 
 Threshold of the fermi landscape.
 """
-function Est(l::Int, epsilon::Real)::Real
-    return (3l/4 - 5) * epsilon
+function Est(l::Int, epsilon::Real, l0::Int)::Real
+    return (3l/4 - l0) * epsilon
 end
 
 
 
 mutable struct quadratic_fitness <: fitness_functions
     l::Int64
-    c::Float64
+    c::Real
+    l0::Int64
+    epsilon::Real
     E_Star::Function
 end
 
 # Setting some defaults
-quadratic_fitness(;l=10, c=1, E_Star=Est) = quadratic_fitness(l, c, E_Star)
+quadratic_fitness(;l=10, c=1, l0=10, epsilon=1, E_Star=Est) = quadratic_fitness(l, c, l0, epsilon, E_Star)
 
 
 """
@@ -139,7 +143,7 @@ quadratic_fitness(;l=10, c=1, E_Star=Est) = quadratic_fitness(l, c, E_Star)
 Evaluate quadratic fitness function.
 """
 function _fitness(E::Float64, p::quadratic_fitness)
-    fitness = -p.c * (E - p.E_Star(p.l))^2
+    fitness = -p.c * (E - p.E_Star(p.l, p.epsilon, p.l0))^2
     return fitness
 end
 
@@ -152,7 +156,7 @@ end
 Evaluate fermi fitness function.
 """
 function _fitness(E::Float64, l::Int64, p::quadratic_fitness)
-    fitness = -p.c * (E - p.E_Star(l))^2
+    fitness = -p.c * (E - p.E_Star(l, p.epsilon, p.l0))^2
     return fitness
 end
 
@@ -160,32 +164,33 @@ end
 """
     mutable struct linear_fitness <: fitness_functions
 
-Fitness landscape that has the form of a fermi function.
+Fitness landscape that is linear.
 """
 mutable struct linear_fitness <: Jevo.fitness_functions
     l::Int64
     s::Real
-    fl::Float64
+    fl::Real
     n::Int64
-    epsilon::Float64
+    epsilon::Real
+    l0::Int64
 end
 
 # Setting some defaults
-linear_fitness(;l=10, s=1, fl=0, n=4, epsilon=1) = linear_fitness(l, s, fl, n, epsilon)
+linear_fitness(;l=10, s=1, fl=0, n=4, epsilon=1, l0=10) = linear_fitness(l, s, fl, n, epsilon, l0)
 
     
 function _fitness(E::Real, p::linear_fitness)::Float64
-    fitness = -p.fl * p.l + p.s/(p.l * p.epsilon) * ((p.n-1)/p.n * (p.l * p.epsilon)  - 5  - E )
+    fitness = -p.fl * p.l + p.s/(p.l * p.epsilon) * ((p.n-1)/p.n * (p.l * p.epsilon)  - p.l0  - E )
     return fitness
 end
 
 
 function _fitness(E::Real, l::Int64, p::linear_fitness)::Float64
-    fitness = -p.fl * l + p.s/(p.l * p.epsilon) * ((p.n-1)/p.n * (p.l * p.epsilon)  - 5  - E )
+    fitness = -p.fl * l + p.s/(p.l * p.epsilon) * ((p.n-1)/p.n * (p.l * p.epsilon)  - p.l0 - E )
     return fitness
 end
 
-
+#=
 """
     mutable struct linear_fitness <: fitness_functions
 
@@ -221,6 +226,7 @@ function _fitness(E::Real, l::Int64, p::semi_linear_fitness)::Float64
     end
     return fitness
 end
+=#
 
 # Add some beautiful broadcasting
 fitness(E, l, p) = _fitness(E, l, p)
