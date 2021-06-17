@@ -234,10 +234,10 @@ function l_substitution!(
     fitness_function::fitness_functions) where {T<:Real}
 
     temp_pop = deepcopy(pop)
-    if rand() < 0.5 && pop.l > 1
+    if rand() < 0.5
         push!(temp_pop.seqs, rand(1:pop.n))
         push!(temp_pop.driver, rand(1:pop.m))
-    else
+    elseif length(temp_pop.seqs) > 1
         pop!(temp_pop.seqs)
         pop!(temp_pop.driver)
     end
